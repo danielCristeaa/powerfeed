@@ -1,18 +1,20 @@
 <template>
-    <div class="row">
-        <div class="col-md-2 ml-2">
-            <h5>Your Feeds</h5>
-            <a class="btn btn-info" data-toggle="modal" data-target="#addFeedModal">+ Add feed</a>
-            <div id="feeds">
-                <div class="card" v-for="feed in feeds">
-                    <div class="card-body" :id="feed['_id']" >
-                        {{ feed['name'] }}
-                        <button @click="loadFeed(feed['_id'])">Button</button>
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <div class="col-md-2">
+                <h5>Your Feeds</h5>
+                <a class="btn btn-info" data-toggle="modal" data-target="#addFeedModal">+ Add feed</a>
+                <div id="feeds">
+                    <div class="card" v-for="feed in feeds">
+                        <div class="card-body" :id="feed['_id']" >
+                            {{ feed['name'] }}
+                            <button @click="loadFeed(feed['_id'])">Button</button>
+                        </div>
                     </div>
                 </div>
             </div>
+            <grid :feedId="returnFeedId" />
         </div>
-        <grid :feedId="returnFeedId" />
     </div>
 </template>
 

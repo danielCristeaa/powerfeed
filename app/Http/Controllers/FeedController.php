@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Feed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class FeedController extends Controller
 {
@@ -22,8 +23,12 @@ class FeedController extends Controller
 
     public function getFeed($id)
     {
-        $feed = Feed::all()->where('_id', $id)->toArray();
-        return $feed;
+        $feed = DB::collection('feeds')->where('_id', $id)->first();
+        $columns = [];
+        foreach($feed['products'][0] as $property => $value) {
+            $columns[] = $property;
+        }
+        return [$columns, $feed['products']];
     }
 
     public function getUserFeeds()

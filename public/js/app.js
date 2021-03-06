@@ -2269,6 +2269,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
@@ -2324,6 +2326,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "Grid",
@@ -2334,26 +2337,38 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      columns: [{
-        prop: "name"
-      }, {
-        prop: "details"
-      }],
-      rows: [{
-        name: "1",
-        details: "Item 1"
-      }]
+      columns: [],
+      rows: []
     };
   },
   watch: {
     feedId: function feedId(id) {
-      console.log(id);
       this.feedId = id;
+      var self = this;
+      var newColumns = [];
+      var newRows = [];
       axios.get("/feed/" + this.feedId).then(function (response) {
-        return console.log(response);
+        response.data[0].forEach(function (element) {
+          newColumns.push({
+            prop: element,
+            name: element,
+            size: 150
+          });
+        });
+        response.data[1].forEach(function (array) {
+          var bufferObject = {};
+
+          for (var i in array) {
+            bufferObject[i] = array[i];
+          }
+
+          newRows.push(bufferObject);
+        });
+        self.columns = newColumns;
+        self.rows = newRows;
       })["catch"](function (error) {
         return console.log(error);
-      });
+      }); // console.log(this.columns)
     }
   },
   components: {
@@ -38000,59 +38015,61 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    { staticClass: "row" },
-    [
-      _c("div", { staticClass: "col-md-2 ml-2" }, [
-        _c("h5", [_vm._v("Your Feeds")]),
-        _vm._v(" "),
-        _c(
-          "a",
-          {
-            staticClass: "btn btn-info",
-            attrs: { "data-toggle": "modal", "data-target": "#addFeedModal" }
-          },
-          [_vm._v("+ Add feed")]
-        ),
-        _vm._v(" "),
-        _c(
-          "div",
-          { attrs: { id: "feeds" } },
-          _vm._l(_vm.feeds, function(feed) {
-            return _c("div", { staticClass: "card" }, [
-              _c(
-                "div",
-                { staticClass: "card-body", attrs: { id: feed["_id"] } },
-                [
-                  _vm._v(
-                    "\n                    " +
-                      _vm._s(feed["name"]) +
-                      "\n                    "
-                  ),
-                  _c(
-                    "button",
-                    {
-                      on: {
-                        click: function($event) {
-                          return _vm.loadFeed(feed["_id"])
+  return _c("div", { staticClass: "container-fluid h-100" }, [
+    _c(
+      "div",
+      { staticClass: "row h-100" },
+      [
+        _c("div", { staticClass: "col-md-2" }, [
+          _c("h5", [_vm._v("Your Feeds")]),
+          _vm._v(" "),
+          _c(
+            "a",
+            {
+              staticClass: "btn btn-info",
+              attrs: { "data-toggle": "modal", "data-target": "#addFeedModal" }
+            },
+            [_vm._v("+ Add feed")]
+          ),
+          _vm._v(" "),
+          _c(
+            "div",
+            { attrs: { id: "feeds" } },
+            _vm._l(_vm.feeds, function(feed) {
+              return _c("div", { staticClass: "card" }, [
+                _c(
+                  "div",
+                  { staticClass: "card-body", attrs: { id: feed["_id"] } },
+                  [
+                    _vm._v(
+                      "\n                        " +
+                        _vm._s(feed["name"]) +
+                        "\n                        "
+                    ),
+                    _c(
+                      "button",
+                      {
+                        on: {
+                          click: function($event) {
+                            return _vm.loadFeed(feed["_id"])
+                          }
                         }
-                      }
-                    },
-                    [_vm._v("Button")]
-                  )
-                ]
-              )
-            ])
-          }),
-          0
-        )
-      ]),
-      _vm._v(" "),
-      _c("grid", { attrs: { feedId: _vm.returnFeedId } })
-    ],
-    1
-  )
+                      },
+                      [_vm._v("Button")]
+                    )
+                  ]
+                )
+              ])
+            }),
+            0
+          )
+        ]),
+        _vm._v(" "),
+        _c("grid", { attrs: { feedId: _vm.returnFeedId } })
+      ],
+      1
+    )
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -38078,10 +38095,15 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { attrs: { id: "grid" } },
+    { staticClass: "col-md-10", attrs: { id: "grid" } },
     [
       _c("v-grid", {
-        attrs: { theme: "compact", source: _vm.rows, columns: _vm.columns }
+        attrs: {
+          theme: "compact",
+          source: _vm.rows,
+          columns: _vm.columns,
+          resize: "true"
+        }
       })
     ],
     1
@@ -50548,26 +50570,14 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/sass/app.scss":
-/*!*********************************!*\
-  !*** ./resources/sass/app.scss ***!
-  \*********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-// removed by extract-text-webpack-plugin
-
-/***/ }),
-
 /***/ 0:
-/*!*************************************************************!*\
-  !*** multi ./resources/js/app.js ./resources/sass/app.scss ***!
-  \*************************************************************/
+/*!***********************************!*\
+  !*** multi ./resources/js/app.js ***!
+  \***********************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! D:\Master\Disertatie\powerfeed\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! D:\Master\Disertatie\powerfeed\resources\sass\app.scss */"./resources/sass/app.scss");
+module.exports = __webpack_require__(/*! D:\Master\Disertatie\powerfeed\resources\js\app.js */"./resources/js/app.js");
 
 
 /***/ })

@@ -1,9 +1,10 @@
 <template>
-    <div id="grid">
+    <div id="grid" class="col-md-10">
         <v-grid
             theme="compact"
             :source="rows"
             :columns="columns"
+            resize="true"
         ></v-grid>
     </div>
 </template>
@@ -19,21 +20,34 @@ export default {
     },
     data() {
         return {
-            columns: [{ prop: "name" }, { prop: "details" }],
-            rows: [{
-                name: "1",
-                details: "Item 1",
-            }]
+            columns: [],
+            rows: [],
         }
     },
     watch: {
         feedId(id) {
-            console.log(id);
             this.feedId = id
+            const self = this
+            let newColumns = []
+            let newRows = []
             axios
                 .get("/feed/"+this.feedId)
-                .then(response => (console.log(response)))
+                .then(response => {
+                    response.data[0].forEach(function(element){
+                        newColumns.push({ prop: element, name: element, size: 150})
+                    })
+                    response.data[1].forEach(function(array) {
+                        let bufferObject = {}
+                        for(let i in array) {
+                            bufferObject.[i] = array[i]
+                        }
+                        newRows.push(bufferObject);
+                    })
+                    self.columns = newColumns
+                    self.rows = newRows
+                })
                 .catch(error => console.log(error))
+            // console.log(this.columns)
         }
     },
     components: {

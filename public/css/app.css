@@ -10903,3 +10903,10 @@ a.text-dark:focus {
   }
 }
 
+html, body{
+    height: 100%;
+}
+
+#app {
+    height: 90%;
+}
