@@ -5,7 +5,10 @@
 
             <ul class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action bg-light" data-toggle="modal" data-target="#addFeedModal"><i class="fas fa-plus fa-lg"></i> <b>Add</b></a>
-                <a href="#" class="list-group-item list-group-item-action bg-light" :class="{ 'firstFeed' : index == 0 && firstClick == false }" @click="loadFeed(feed['_id'])" :id="feed['_id']" v-for="(feed, index) in feeds">{{ feed['name'] }}</a>
+                <a href="#" class="list-group-item list-group-item-action bg-light" :class="{ 'firstFeed' : feedId == feed['_id']}" @click="loadFeed(feed['_id'])" :id="feed['_id']" v-for="(feed, index) in feeds">
+                    {{ feed['name'] }}
+                    <a style="float:right" data-toggle="modal" data-target="#addFeedModal"><i class="fas fa-edit fa-lg"></i></a>
+                </a>
             </ul>
         </div>
         <grid :feedId="returnFeedId" />

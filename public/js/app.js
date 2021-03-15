@@ -2265,6 +2265,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
@@ -38682,7 +38685,7 @@ var render = function() {
                   {
                     staticClass:
                       "list-group-item list-group-item-action bg-light",
-                    class: { firstFeed: index == 0 && _vm.firstClick == false },
+                    class: { firstFeed: _vm.feedId == feed["_id"] },
                     attrs: { href: "#", id: feed["_id"] },
                     on: {
                       click: function($event) {
@@ -38690,7 +38693,14 @@ var render = function() {
                       }
                     }
                   },
-                  [_vm._v(_vm._s(feed["name"]))]
+                  [
+                    _vm._v(
+                      "\n                " +
+                        _vm._s(feed["name"]) +
+                        "\n                "
+                    ),
+                    _vm._m(1, true)
+                  ]
                 )
               })
             ],
@@ -38720,6 +38730,19 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("b", [_vm._v("Add")])
       ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "a",
+      {
+        staticStyle: { float: "right" },
+        attrs: { "data-toggle": "modal", "data-target": "#addFeedModal" }
+      },
+      [_c("i", { staticClass: "fas fa-edit fa-lg" })]
     )
   }
 ]
