@@ -1,5 +1,5 @@
 <template>
-    <div id="grid" class="col-md-10">
+    <div id="grid" class="container-fluid" style="overflow-y: scroll">
         <v-grid
             theme="compact"
             :source="rows"
@@ -47,7 +47,6 @@ export default {
                     self.rows = newRows
                 })
                 .catch(error => console.log(error))
-            // console.log(this.columns)
         }
     },
     components: {

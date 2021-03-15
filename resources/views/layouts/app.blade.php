@@ -11,6 +11,7 @@
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
+    <script src="https://kit.fontawesome.com/6fdc95440b.js" crossorigin="anonymous"></script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -75,7 +76,7 @@
             </div>
         </nav>
 
-        <main class="py-4 h-100">
+        <main>
             @yield('content')
         </main>
     </div>
