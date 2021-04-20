@@ -25,16 +25,16 @@ export default {
         }
     },
     watch: {
-        feedId(id) {
+        feedId: function (id) {
             this.feedId = id
             const self = this
             let newColumns = []
             let newRows = []
             axios
-                .get("/feed/"+this.feedId)
+                .get("/feed/" + this.feedId)
                 .then(response => {
-                    response.data[0].forEach(function(element){
-                        newColumns.push({ prop: element, name: element, size: 150})
+                    response.data[0].forEach(function(element) {
+                        newColumns.push({ prop: element, name: element, size: 150 })
                     })
                     response.data[1].forEach(function(array) {
                         let bufferObject = {}

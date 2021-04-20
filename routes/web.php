@@ -24,3 +24,4 @@ Route::get('/feeds', [App\Http\Controllers\FeedController::class, 'index'])->nam
 Route::get('/feed/{_id}', [App\Http\Controllers\FeedController::class, 'getFeed']);
 Route::get('/getUserFeeds', [App\Http\Controllers\FeedController::class, 'getUserFeeds']);
 Route::post('addFeed', array('uses'=>'App\Http\Controllers\FeedController@create'));
+Route::post('/editFeed/{_id}', [App\Http\Controllers\FeedController::class, 'update']);

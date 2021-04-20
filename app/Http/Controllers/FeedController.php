@@ -28,7 +28,7 @@ class FeedController extends Controller
         foreach($feed['products'][0] as $property => $value) {
             $columns[] = $property;
         }
-        return [$columns, $feed['products']];
+        return [$columns, $feed['products'], $feed['name'], $feed['url']];
     }
 
     public function getUserFeeds()
@@ -81,7 +81,7 @@ class FeedController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -114,13 +114,19 @@ class FeedController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Feed  $feed
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param $id
+     * @return void
      */
-    public function update(Request $request, Feed $feed)
+    public function update(Request $request, $id)
     {
-        //
+        $updatedFeed = Feed::where('_id', $id)->first();
+
+        $updatedFeed->name = $request->input('name');
+        $updatedFeed->url = $request->input('url');
+
+        $updatedFeed->save();
+        return json_encode($updatedFeed);
     }
 
     /**

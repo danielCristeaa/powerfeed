@@ -6,21 +6,24 @@
             <ul class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action bg-light" data-toggle="modal" data-target="#addFeedModal"><i class="fas fa-plus fa-lg"></i> <b>Add</b></a>
                 <a href="#" class="list-group-item list-group-item-action bg-light" :class="{ 'firstFeed' : feedId == feed['_id']}" @click="loadFeed(feed['_id'])" :id="feed['_id']" v-for="(feed, index) in feeds">
-                    {{ feed['name'] }}
-                    <a style="float:right" data-toggle="modal" data-target="#addFeedModal"><i class="fas fa-edit fa-lg"></i></a>
+                    <span>{{ feed['name'] }}</span>
+                    <a style="float:right" data-toggle="modal" data-target="#editFeedModal"><i class="fas fa-edit fa-lg"></i></a>
                 </a>
             </ul>
         </div>
         <grid :feedId="returnFeedId" />
+        <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit"/>
     </div>
 </template>
 
 <script>
 import Grid from './GridComponent'
+import EditFeedModalComponent from "./EditFeedModalComponent";
 
 export default {
     components: {
-        Grid
+        Grid,
+        EditFeedModalComponent,
     },
     data() {
         return {
@@ -47,6 +50,9 @@ export default {
         loadFeed(id) {
             this.feedId = id;
             this.firstClick = true;
+        },
+        updateValuesAfterEdit(newName) {
+            document.getElementById(this.feedId).getElementsByTagName('span')[0].innerHTML = newName
         }
     }
 }
