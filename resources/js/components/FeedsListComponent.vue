@@ -13,7 +13,7 @@
         </div>
         <grid :feedId="returnFeedId" :column-edits="returnColumnEdits"/>
         <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit" />
-        <edit-column-component :feedId="returnFeedId" @updated-column-name="updateColumnName"/>
+        <edit-column-component :feedId="returnFeedId" @update-columns="updateColumns"/>
     </div>
 </template>
 
@@ -59,7 +59,7 @@ export default {
         updateValuesAfterEdit(newName) {
             document.getElementById(this.feedId).getElementsByTagName('span')[0].innerHTML = newName
         },
-        updateColumnName(newName) {
+        updateColumns() {
             this.columnEdits++;
         }
     }

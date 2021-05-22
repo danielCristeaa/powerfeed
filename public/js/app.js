@@ -2243,6 +2243,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "EditColumnModal",
   props: {
@@ -2278,7 +2280,7 @@ __webpack_require__.r(__webpack_exports__);
         newName: this.newColumnName,
         oldName: this.oldColumnName
       }).then(function (response) {
-        self.$emit('updated-column-name');
+        self.$emit('update-columns');
       })["catch"](function (error) {
         console.log(error);
       });
@@ -2290,6 +2292,18 @@ __webpack_require__.r(__webpack_exports__);
       this.modal.style.display = "none";
       this.modal.className = "modal fade";
       this.modal.style.opacity = 0;
+    },
+    deleteColumn: function deleteColumn() {
+      var self = this;
+      this.setDataValues();
+      axios.put("/deleteColumn/" + this.feedId, {
+        column: this.oldColumnName
+      }).then(function (response) {
+        self.$emit('update-columns');
+      })["catch"](function (error) {
+        console.log(error);
+      });
+      this.hideModal();
     }
   }
 });
@@ -2483,7 +2497,7 @@ __webpack_require__.r(__webpack_exports__);
     updateValuesAfterEdit: function updateValuesAfterEdit(newName) {
       document.getElementById(this.feedId).getElementsByTagName('span')[0].innerHTML = newName;
     },
-    updateColumnName: function updateColumnName(newName) {
+    updateColumns: function updateColumns() {
       this.columnEdits++;
     }
   }
@@ -38964,7 +38978,23 @@ var render = function() {
                       _vm.newColumnName = $event.target.value
                     }
                   }
-                })
+                }),
+                _vm._v(" "),
+                _c("br"),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-danger btn-block",
+                    attrs: { type: "button", "data-dismiss": "modal" },
+                    on: {
+                      click: function($event) {
+                        return _vm.deleteColumn()
+                      }
+                    }
+                  },
+                  [_vm._v("Delete column")]
+                )
               ]),
               _vm._v(" "),
               _c("div", { staticClass: "modal-footer" }, [
@@ -39270,7 +39300,7 @@ var render = function() {
       _vm._v(" "),
       _c("edit-column-component", {
         attrs: { feedId: _vm.returnFeedId },
-        on: { "updated-column-name": _vm.updateColumnName }
+        on: { "update-columns": _vm.updateColumns }
       })
     ],
     1

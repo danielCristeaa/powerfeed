@@ -13,6 +13,8 @@
                         <div class="form-group">
                             <label class="col-form-label">Name</label>
                             <input type="text" class="form-control" name="newColumnName" v-on:click.once="setDataValues" v-model="newColumnName">
+                            <br>
+                            <button type="button" class="btn btn-danger btn-block" data-dismiss="modal" @click="deleteColumn()">Delete column</button>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-primary" data-dismiss="modal" @click="changeName()">Submit</button>
@@ -57,7 +59,7 @@ export default {
             axios
                 .post("/renameColumn/"+this.feedId, {newName: this.newColumnName, oldName: this.oldColumnName})
                 .then(function (response){
-                    self.$emit('updated-column-name')
+                    self.$emit('update-columns')
                 })
                 .catch(function (error){
                     console.log(error)
@@ -71,6 +73,19 @@ export default {
             this.modal.style.display = "none"
             this.modal.className = "modal fade"
             this.modal.style.opacity = 0
+        },
+        deleteColumn() {
+            const self = this
+            this.setDataValues()
+            axios
+                .put("/deleteColumn/"+this.feedId, {column: this.oldColumnName})
+                .then(function (response){
+                    self.$emit('update-columns')
+                })
+                .catch(function (error){
+                    console.log(error)
+                })
+            this.hideModal()
         }
     }
 }

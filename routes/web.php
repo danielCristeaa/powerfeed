@@ -26,3 +26,4 @@ Route::get('/getUserFeeds', [App\Http\Controllers\FeedController::class, 'getUse
 Route::post('addFeed', array('uses'=>'App\Http\Controllers\FeedController@create'));
 Route::post('/editFeed/{_id}', [App\Http\Controllers\FeedController::class, 'update']);
 Route::post('/renameColumn/{_id}', [App\Http\Controllers\FeedController::class, 'renameColumn']);
+Route::put('/deleteColumn/{_id}', [App\Http\Controllers\FeedController::class, 'deleteColumn']);

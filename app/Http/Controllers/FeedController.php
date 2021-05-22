@@ -147,7 +147,7 @@ class FeedController extends Controller
             $oldKeyIndex = array_search($oldColumnName, $arrayKeys);
             $arrayKeys[$oldKeyIndex] = $newColumnName;
 
-            $newArray =  array_combine($arrayKeys, $product);
+            $newArray = array_combine($arrayKeys, $product);
             $tempArray[] = $newArray;
         }
 
@@ -155,7 +155,29 @@ class FeedController extends Controller
         $updatedFeed->save();
         return json_encode($updatedFeed->products);
     }
+    /**
+     *
+     * Update the specified resource in storage.
+     *
+     * @param Request $request
+     * @param $id
+     */
+    public function deleteColumn(Request $request, $id)
+    {
+        $updatedFeed = Feed::where('_id', $id)->first();
+        $deletedColumn = $request->input('column');
 
+        $tempArray = [];
+        foreach($updatedFeed->products as $product) {
+            $newArray = $product;
+            unset($newArray[$deletedColumn]);
+            $tempArray[] = $newArray;
+        }
+
+        $updatedFeed->products = $tempArray;
+        $updatedFeed->save();
+        return json_encode($updatedFeed->products);
+    }
     /**
      * Remove the specified resource from storage.
      *
