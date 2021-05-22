@@ -57,7 +57,7 @@ export default {
             axios
                 .post("/renameColumn/"+this.feedId, {newName: this.newColumnName, oldName: this.oldColumnName})
                 .then(function (response){
-                    self.$emit('updated-column-name', self.newColumnName)
+                    self.$emit('updated-column-name')
                 })
                 .catch(function (error){
                     console.log(error)
