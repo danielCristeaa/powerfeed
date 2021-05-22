@@ -130,6 +130,33 @@ class FeedController extends Controller
     }
 
     /**
+     * Update the specified resource in storage.
+     *
+     * @param Request $request
+     * @param $id
+     */
+    public function renameColumn(Request $request, $id)
+    {
+        $updatedFeed = Feed::where('_id', $id)->first();
+        $oldColumnName = $request->input('oldName');
+        $newColumnName = $request->input('newName');
+
+        $tempArray = [];
+        foreach($updatedFeed->products as $product) {
+            $arrayKeys = array_keys($product);
+            $oldKeyIndex = array_search($oldColumnName, $arrayKeys);
+            $arrayKeys[$oldKeyIndex] = $newColumnName;
+
+            $newArray =  array_combine($arrayKeys, $product);
+            $tempArray[] = $newArray;
+        }
+
+        $updatedFeed->products = $tempArray;
+        $updatedFeed->save();
+        return json_encode($updatedFeed->products);
+    }
+
+    /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Feed  $feed

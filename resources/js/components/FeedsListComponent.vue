@@ -11,8 +11,9 @@
                 </a>
             </ul>
         </div>
-        <grid :feedId="returnFeedId" />
-        <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit"/>
+        <grid :feedId="returnFeedId" :column-edits="returnColumnEdits"/>
+        <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit" />
+        <edit-column-component :feedId="returnFeedId" @updated-column-name="updateColumnName"/>
     </div>
 </template>
 
@@ -30,11 +31,15 @@ export default {
             feeds: [],
             feedId: null,
             firstClick: false,
+            columnEdits: 0
         }
     },
     computed: {
         returnFeedId() {
             return this.feedId;
+        },
+        returnColumnEdits() {
+            return this.columnEdits
         }
     },
     mounted() {
@@ -53,6 +58,9 @@ export default {
         },
         updateValuesAfterEdit(newName) {
             document.getElementById(this.feedId).getElementsByTagName('span')[0].innerHTML = newName
+        },
+        updateColumnName(newName) {
+            this.columnEdits++;
         }
     }
 }

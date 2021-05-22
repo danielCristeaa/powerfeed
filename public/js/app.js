@@ -2208,6 +2208,94 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/EditColumnModal.vue?vue&type=script&lang=js&":
+/*!**************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/EditColumnModal.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "EditColumnModal",
+  props: {
+    feedId: {
+      required: true
+    }
+  },
+  data: function data() {
+    return {
+      newColumnName: null,
+      oldColumnName: null,
+      visible: null,
+      modal: null
+    };
+  },
+  mounted: function mounted() {
+    this.modal = document.querySelector("#editColumnModal");
+  },
+  methods: {
+    setDataValues: function setDataValues() {
+      this.oldColumnName = document.querySelector("input[name='newColumnName']").value;
+      this.newColumnName = this.oldColumnName;
+    },
+    changeName: function changeName() {
+      var self = this;
+
+      if (this.oldColumnName == null && this.newColumnName == null) {
+        document.querySelector('.closeEditColumnModalBtn').click();
+        return;
+      }
+
+      axios.post("/renameColumn/" + this.feedId, {
+        newName: this.newColumnName,
+        oldName: this.oldColumnName
+      }).then(function (response) {
+        self.$emit('updated-column-name', self.newColumnName);
+      })["catch"](function (error) {
+        console.log(error);
+      });
+      self.modal.style.display = "none";
+      self.modal.className = "modal fade";
+      self.modal.style.opacity = 0;
+    },
+    hideModal: function hideModal() {
+      this.modal.style.display = "none";
+      this.modal.className = "modal fade";
+      this.modal.style.opacity = 0;
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/EditFeedModalComponent.vue?vue&type=script&lang=js&":
 /*!*********************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/EditFeedModalComponent.vue?vue&type=script&lang=js& ***!
@@ -2353,6 +2441,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2364,12 +2453,16 @@ __webpack_require__.r(__webpack_exports__);
     return {
       feeds: [],
       feedId: null,
-      firstClick: false
+      firstClick: false,
+      columnEdits: 0
     };
   },
   computed: {
     returnFeedId: function returnFeedId() {
       return this.feedId;
+    },
+    returnColumnEdits: function returnColumnEdits() {
+      return this.columnEdits;
     }
   },
   mounted: function mounted() {
@@ -2389,6 +2482,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     updateValuesAfterEdit: function updateValuesAfterEdit(newName) {
       document.getElementById(this.feedId).getElementsByTagName('span')[0].innerHTML = newName;
+    },
+    updateColumnName: function updateColumnName(newName) {
+      this.columnEdits++;
     }
   }
 });
@@ -2417,19 +2513,27 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "Grid",
   props: {
     feedId: {
       required: true
+    },
+    columnEdits: {
+      required: true
     }
   },
   data: function data() {
     return {
       columns: [],
-      rows: []
+      rows: [],
+      modal: null
     };
+  },
+  mounted: function mounted() {
+    this.modal = document.querySelector("#editColumnModal");
   },
   watch: {
     feedId: function feedId(id) {
@@ -2442,7 +2546,90 @@ __webpack_require__.r(__webpack_exports__);
           newColumns.push({
             prop: element,
             name: element,
-            size: 150
+            size: 150,
+            columnTemplate: function columnTemplate(createElement, column) {
+              return [createElement('div', {}, column.name), createElement('a', {
+                style: {
+                  position: 'absolute',
+                  top: '0px',
+                  right: '10px'
+                },
+                onclick: function onclick() {
+                  self.modal.classList.add('show');
+                  self.modal.style.paddingRight = "17px";
+                  self.modal.style.display = "block";
+                  var input = document.querySelector("input[name='newColumnName']");
+                  setTimeout(function () {
+                    self.modal.style.opacity = 1;
+                  }, 5);
+                  input.value = column.name;
+                }
+              }, createElement('i', {
+                "class": {
+                  'fa': true,
+                  'fa-cog': true
+                },
+                style: {
+                  width: '10px',
+                  height: '10px'
+                }
+              }))];
+            }
+          });
+        });
+        response.data[1].forEach(function (array) {
+          var bufferObject = {};
+
+          for (var i in array) {
+            bufferObject[i] = array[i];
+          }
+
+          newRows.push(bufferObject);
+        });
+        self.columns = newColumns;
+        self.rows = newRows;
+      })["catch"](function (error) {
+        return console.log(error);
+      });
+    },
+    columnEdits: function columnEdits() {
+      var self = this;
+      var newColumns = [];
+      var newRows = [];
+      axios.get("/feed/" + this.feedId).then(function (response) {
+        response.data[0].forEach(function (element) {
+          newColumns.push({
+            prop: element,
+            name: element,
+            size: 150,
+            columnTemplate: function columnTemplate(createElement, column) {
+              return [createElement('div', {}, column.name), createElement('a', {
+                style: {
+                  position: 'absolute',
+                  top: '0px',
+                  right: '10px'
+                },
+                onclick: function onclick() {
+                  self.modal.classList.add('show');
+                  self.modal.style.paddingRight = "17px";
+                  self.modal.style.display = "block";
+                  var input = document.querySelector("input[name='newColumnName']");
+                  setTimeout(function () {
+                    self.modal.style.opacity = 1;
+                  }, 5);
+                  input.value = column.name;
+                }
+              }, createElement('i', {
+                "class": {
+                  'fa': true,
+                  'fa-cog': true
+                },
+                style: {
+                  width: '10px',
+                  height: '10px'
+                }
+              }))];
+            }
           });
         });
         response.data[1].forEach(function (array) {
@@ -38688,6 +38875,127 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/EditColumnModal.vue?vue&type=template&id=559c6b1c&scoped=true&":
+/*!******************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/EditColumnModal.vue?vue&type=template&id=559c6b1c&scoped=true& ***!
+  \******************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    {
+      staticClass: "modal fade",
+      attrs: {
+        id: "editColumnModal",
+        tabindex: "-1",
+        role: "dialog",
+        "aria-labelledby": "exampleModalLabel",
+        "aria-hidden": "true"
+      }
+    },
+    [
+      _c("div", { staticClass: "modal-dialog", attrs: { role: "document" } }, [
+        _c("div", { staticClass: "modal-content" }, [
+          _c("div", { staticClass: "modal-header" }, [
+            _c(
+              "h5",
+              {
+                staticClass: "modal-title",
+                attrs: { id: "exampleModalLabel" }
+              },
+              [_vm._v("Edit column")]
+            ),
+            _vm._v(" "),
+            _c(
+              "button",
+              {
+                staticClass: "close",
+                attrs: {
+                  type: "button",
+                  "data-dismiss": "modal",
+                  "aria-label": "Close"
+                },
+                on: {
+                  click: function($event) {
+                    return _vm.hideModal()
+                  }
+                }
+              },
+              [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "modal-body" }, [
+            _c("div", [
+              _c("div", { staticClass: "form-group" }, [
+                _c("label", { staticClass: "col-form-label" }, [
+                  _vm._v("Name")
+                ]),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.newColumnName,
+                      expression: "newColumnName"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: { type: "text", name: "newColumnName" },
+                  domProps: { value: _vm.newColumnName },
+                  on: {
+                    "~click": function($event) {
+                      return _vm.setDataValues($event)
+                    },
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.newColumnName = $event.target.value
+                    }
+                  }
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "modal-footer" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { type: "button", "data-dismiss": "modal" },
+                    on: {
+                      click: function($event) {
+                        return _vm.changeName()
+                      }
+                    }
+                  },
+                  [_vm._v("Submit")]
+                )
+              ])
+            ])
+          ])
+        ])
+      ])
+    ]
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/EditFeedModalComponent.vue?vue&type=template&id=2d4b81e3&scoped=true&":
 /*!*************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/EditFeedModalComponent.vue?vue&type=template&id=2d4b81e3&scoped=true& ***!
@@ -38948,11 +39256,21 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
-      _c("grid", { attrs: { feedId: _vm.returnFeedId } }),
+      _c("grid", {
+        attrs: {
+          feedId: _vm.returnFeedId,
+          "column-edits": _vm.returnColumnEdits
+        }
+      }),
       _vm._v(" "),
       _c("edit-feed-modal-component", {
         attrs: { feedId: _vm.returnFeedId },
         on: { "updated-values": _vm.updateValuesAfterEdit }
+      }),
+      _vm._v(" "),
+      _c("edit-column-component", {
+        attrs: { feedId: _vm.returnFeedId },
+        on: { "updated-column-name": _vm.updateColumnName }
       })
     ],
     1
@@ -51228,6 +51546,7 @@ window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.
 Vue.component('example-component', __webpack_require__(/*! ./components/ExampleComponent.vue */ "./resources/js/components/ExampleComponent.vue")["default"]);
 Vue.component('grid-component', __webpack_require__(/*! ./components/GridComponent.vue */ "./resources/js/components/GridComponent.vue")["default"]);
 Vue.component('feedslist-component', __webpack_require__(/*! ./components/FeedsListComponent.vue */ "./resources/js/components/FeedsListComponent.vue")["default"]);
+Vue.component('edit-column-component', __webpack_require__(/*! ./components/EditColumnModal.vue */ "./resources/js/components/EditColumnModal.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -51282,6 +51601,75 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 //     forceTLS: true
 // });
+
+/***/ }),
+
+/***/ "./resources/js/components/EditColumnModal.vue":
+/*!*****************************************************!*\
+  !*** ./resources/js/components/EditColumnModal.vue ***!
+  \*****************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _EditColumnModal_vue_vue_type_template_id_559c6b1c_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EditColumnModal.vue?vue&type=template&id=559c6b1c&scoped=true& */ "./resources/js/components/EditColumnModal.vue?vue&type=template&id=559c6b1c&scoped=true&");
+/* harmony import */ var _EditColumnModal_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./EditColumnModal.vue?vue&type=script&lang=js& */ "./resources/js/components/EditColumnModal.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _EditColumnModal_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _EditColumnModal_vue_vue_type_template_id_559c6b1c_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _EditColumnModal_vue_vue_type_template_id_559c6b1c_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "559c6b1c",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/EditColumnModal.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/EditColumnModal.vue?vue&type=script&lang=js&":
+/*!******************************************************************************!*\
+  !*** ./resources/js/components/EditColumnModal.vue?vue&type=script&lang=js& ***!
+  \******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_EditColumnModal_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./EditColumnModal.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/EditColumnModal.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_EditColumnModal_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/EditColumnModal.vue?vue&type=template&id=559c6b1c&scoped=true&":
+/*!************************************************************************************************!*\
+  !*** ./resources/js/components/EditColumnModal.vue?vue&type=template&id=559c6b1c&scoped=true& ***!
+  \************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_EditColumnModal_vue_vue_type_template_id_559c6b1c_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./EditColumnModal.vue?vue&type=template&id=559c6b1c&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/EditColumnModal.vue?vue&type=template&id=559c6b1c&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_EditColumnModal_vue_vue_type_template_id_559c6b1c_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_EditColumnModal_vue_vue_type_template_id_559c6b1c_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
 
 /***/ }),
 
