@@ -10911,10 +10911,17 @@ a.text-dark:focus {
 
 #wrapper {
     overflow-x: hidden;
+    min-height: 100%;
 }
 
+.navbar {
+    height: 8vh !important;
+}
+main {
+    height: 92vh;
+}
 #sidebar-wrapper {
-    min-height: 100vh;
+    min-height: 100%;
     margin-left: -15rem;
     -webkit-transition: margin .25s ease-out;
     -moz-transition: margin .25s ease-out;

@@ -1,5 +1,5 @@
 <template>
-    <div id="grid" class="container-fluid" style="overflow-y: scroll">
+    <div id="grid" class="container-fluid">
         <v-grid
             theme="compact"
             :source="rows"
@@ -108,5 +108,9 @@ export default {
 </script>
 
 <style scoped>
-
+#grid {
+    overflow-x: auto;
+    overflow-y: auto;
+    padding-right: 0;
+}
 </style>
