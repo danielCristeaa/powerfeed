@@ -62,22 +62,21 @@ export default {
     methods: {
         updateFeed() {
             const self = this
-            if(this.replaceString != null) {
-                axios
-                    .put("/editColumn/"+this.feedId, {
-                        replace: this.replaceString,
-                        with: this.replaceWith,
-                        columnName: this.oldColumnName,
-                        newName: this.newColumnName,
-                        oldName: this.oldColumnName
-                    })
-                    .then(function (response){
-                        self.$emit('update-columns')
-                    })
-                    .catch(function (error){
-                        console.log(error)
-                    })
-            }
+            axios
+                .put("/editColumn/"+this.feedId, {
+                    replace: this.replaceString,
+                    with: this.replaceWith,
+                    columnName: this.oldColumnName,
+                    newName: this.newColumnName,
+                    oldName: this.oldColumnName
+                })
+                .then(function (response){
+                    self.$emit('update-columns')
+                })
+                .catch(function (error){
+                    console.log(error)
+                })
+
             this.hideModal()
         },
         hideModal() {

@@ -2280,21 +2280,17 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     updateFeed: function updateFeed() {
       var self = this;
-
-      if (this.replaceString != null) {
-        axios.put("/editColumn/" + this.feedId, {
-          replace: this.replaceString,
-          "with": this.replaceWith,
-          columnName: this.oldColumnName,
-          newName: this.newColumnName,
-          oldName: this.oldColumnName
-        }).then(function (response) {
-          self.$emit('update-columns');
-        })["catch"](function (error) {
-          console.log(error);
-        });
-      }
-
+      axios.put("/editColumn/" + this.feedId, {
+        replace: this.replaceString,
+        "with": this.replaceWith,
+        columnName: this.oldColumnName,
+        newName: this.newColumnName,
+        oldName: this.oldColumnName
+      }).then(function (response) {
+        self.$emit('update-columns');
+      })["catch"](function (error) {
+        console.log(error);
+      });
       this.hideModal();
     },
     hideModal: function hideModal() {
@@ -7080,7 +7076,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n#grid[data-v-fa23cf08] {\n    overflow-x: auto;\n    overflow-y: auto;\n    padding-right: 0;\n}\n", ""]);
+exports.push([module.i, "\n#grid[data-v-fa23cf08] {\r\n    overflow-x: auto;\r\n    overflow-y: auto;\r\n    padding-right: 0;\n}\r\n", ""]);
 
 // exports
 
