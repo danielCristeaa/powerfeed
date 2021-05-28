@@ -57,6 +57,7 @@ export default {
     watch: {
         openEditColumnModal: function() {
             this.oldColumnName = document.querySelector("input[name='newColumnName']").value
+            this.newColumnName = this.oldColumnName
         }
     },
     methods: {
