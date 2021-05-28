@@ -2245,10 +2245,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "EditColumnModal",
   props: {
     feedId: {
+      required: true
+    },
+    openEditColumnModal: {
+      required: true
+    },
+    modal: {
       required: true
     }
   },
@@ -2257,45 +2268,44 @@ __webpack_require__.r(__webpack_exports__);
       newColumnName: null,
       oldColumnName: null,
       visible: null,
-      modal: null
+      replaceString: null,
+      replaceWith: null
     };
   },
-  mounted: function mounted() {
-    this.modal = document.querySelector("#editColumnModal");
+  watch: {
+    openEditColumnModal: function openEditColumnModal() {
+      this.oldColumnName = document.querySelector("input[name='newColumnName']").value;
+    }
   },
   methods: {
-    setDataValues: function setDataValues() {
-      this.oldColumnName = document.querySelector("input[name='newColumnName']").value;
-      this.newColumnName = this.oldColumnName;
-    },
-    changeName: function changeName() {
+    updateFeed: function updateFeed() {
       var self = this;
 
-      if (this.oldColumnName == null && this.newColumnName == null) {
-        document.querySelector('.closeEditColumnModalBtn').click();
-        return;
+      if (this.replaceString != null) {
+        axios.put("/editColumn/" + this.feedId, {
+          replace: this.replaceString,
+          "with": this.replaceWith,
+          columnName: this.oldColumnName,
+          newName: this.newColumnName,
+          oldName: this.oldColumnName
+        }).then(function (response) {
+          self.$emit('update-columns');
+        })["catch"](function (error) {
+          console.log(error);
+        });
       }
 
-      axios.post("/renameColumn/" + this.feedId, {
-        newName: this.newColumnName,
-        oldName: this.oldColumnName
-      }).then(function (response) {
-        self.$emit('update-columns');
-      })["catch"](function (error) {
-        console.log(error);
-      });
-      self.modal.style.display = "none";
-      self.modal.className = "modal fade";
-      self.modal.style.opacity = 0;
+      this.hideModal();
     },
     hideModal: function hideModal() {
       this.modal.style.display = "none";
       this.modal.className = "modal fade";
       this.modal.style.opacity = 0;
+      this.replaceString = "";
+      this.replaceWith = "";
     },
     deleteColumn: function deleteColumn() {
       var self = this;
-      this.setDataValues();
       axios.put("/deleteColumn/" + this.feedId, {
         column: this.oldColumnName
       }).then(function (response) {
@@ -2455,7 +2465,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2467,16 +2476,12 @@ __webpack_require__.r(__webpack_exports__);
     return {
       feeds: [],
       feedId: null,
-      firstClick: false,
-      columnEdits: 0
+      firstClick: false
     };
   },
   computed: {
     returnFeedId: function returnFeedId() {
       return this.feedId;
-    },
-    returnColumnEdits: function returnColumnEdits() {
-      return this.columnEdits;
     }
   },
   mounted: function mounted() {
@@ -2496,9 +2501,6 @@ __webpack_require__.r(__webpack_exports__);
     },
     updateValuesAfterEdit: function updateValuesAfterEdit(newName) {
       document.getElementById(this.feedId).getElementsByTagName('span')[0].innerHTML = newName;
-    },
-    updateColumns: function updateColumns() {
-      this.columnEdits++;
     }
   }
 });
@@ -2528,14 +2530,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "Grid",
   props: {
     feedId: {
-      required: true
-    },
-    columnEdits: {
       required: true
     }
   },
@@ -2543,123 +2543,75 @@ __webpack_require__.r(__webpack_exports__);
     return {
       columns: [],
       rows: [],
-      modal: null
+      modal: null,
+      openEditColumnModal: 0
     };
   },
   mounted: function mounted() {
     this.modal = document.querySelector("#editColumnModal");
   },
+  methods: {
+    updateColumns: function updateColumns() {
+      var self = this;
+      var newColumns = [];
+      var newRows = [];
+      axios.get("/feed/" + this.feedId).then(function (response) {
+        response.data[0].forEach(function (element) {
+          newColumns.push({
+            prop: element,
+            name: element,
+            size: 150,
+            columnTemplate: function columnTemplate(createElement, column) {
+              return [createElement('div', {}, column.name), createElement('a', {
+                style: {
+                  position: 'absolute',
+                  top: '0px',
+                  right: '10px'
+                },
+                onclick: function onclick() {
+                  self.modal.classList.add('show');
+                  self.modal.style.paddingRight = "17px";
+                  self.modal.style.display = "block";
+                  self.openEditColumnModal++;
+                  var input = document.querySelector("input[name='newColumnName']");
+                  setTimeout(function () {
+                    self.modal.style.opacity = 1;
+                  }, 5);
+                  input.value = column.name;
+                }
+              }, createElement('i', {
+                "class": {
+                  'fa': true,
+                  'fa-cog': true
+                },
+                style: {
+                  width: '10px',
+                  height: '10px'
+                }
+              }))];
+            }
+          });
+        });
+        response.data[1].forEach(function (array) {
+          var bufferObject = {};
+
+          for (var i in array) {
+            bufferObject[i] = array[i];
+          }
+
+          newRows.push(bufferObject);
+        });
+        self.columns = newColumns;
+        self.rows = newRows;
+      })["catch"](function (error) {
+        return console.log(error);
+      });
+    }
+  },
   watch: {
     feedId: function feedId(id) {
       this.feedId = id;
-      var self = this;
-      var newColumns = [];
-      var newRows = [];
-      axios.get("/feed/" + this.feedId).then(function (response) {
-        response.data[0].forEach(function (element) {
-          newColumns.push({
-            prop: element,
-            name: element,
-            size: 150,
-            columnTemplate: function columnTemplate(createElement, column) {
-              return [createElement('div', {}, column.name), createElement('a', {
-                style: {
-                  position: 'absolute',
-                  top: '0px',
-                  right: '10px'
-                },
-                onclick: function onclick() {
-                  self.modal.classList.add('show');
-                  self.modal.style.paddingRight = "17px";
-                  self.modal.style.display = "block";
-                  var input = document.querySelector("input[name='newColumnName']");
-                  setTimeout(function () {
-                    self.modal.style.opacity = 1;
-                  }, 5);
-                  input.value = column.name;
-                }
-              }, createElement('i', {
-                "class": {
-                  'fa': true,
-                  'fa-cog': true
-                },
-                style: {
-                  width: '10px',
-                  height: '10px'
-                }
-              }))];
-            }
-          });
-        });
-        response.data[1].forEach(function (array) {
-          var bufferObject = {};
-
-          for (var i in array) {
-            bufferObject[i] = array[i];
-          }
-
-          newRows.push(bufferObject);
-        });
-        self.columns = newColumns;
-        self.rows = newRows;
-      })["catch"](function (error) {
-        return console.log(error);
-      });
-    },
-    columnEdits: function columnEdits() {
-      var self = this;
-      var newColumns = [];
-      var newRows = [];
-      axios.get("/feed/" + this.feedId).then(function (response) {
-        response.data[0].forEach(function (element) {
-          newColumns.push({
-            prop: element,
-            name: element,
-            size: 150,
-            columnTemplate: function columnTemplate(createElement, column) {
-              return [createElement('div', {}, column.name), createElement('a', {
-                style: {
-                  position: 'absolute',
-                  top: '0px',
-                  right: '10px'
-                },
-                onclick: function onclick() {
-                  self.modal.classList.add('show');
-                  self.modal.style.paddingRight = "17px";
-                  self.modal.style.display = "block";
-                  var input = document.querySelector("input[name='newColumnName']");
-                  setTimeout(function () {
-                    self.modal.style.opacity = 1;
-                  }, 5);
-                  input.value = column.name;
-                }
-              }, createElement('i', {
-                "class": {
-                  'fa': true,
-                  'fa-cog': true
-                },
-                style: {
-                  width: '10px',
-                  height: '10px'
-                }
-              }))];
-            }
-          });
-        });
-        response.data[1].forEach(function (array) {
-          var bufferObject = {};
-
-          for (var i in array) {
-            bufferObject[i] = array[i];
-          }
-
-          newRows.push(bufferObject);
-        });
-        self.columns = newColumns;
-        self.rows = newRows;
-      })["catch"](function (error) {
-        return console.log(error);
-      });
+      this.updateColumns();
     }
   },
   components: {
@@ -38968,9 +38920,6 @@ var render = function() {
                   attrs: { type: "text", name: "newColumnName" },
                   domProps: { value: _vm.newColumnName },
                   on: {
-                    "~click": function($event) {
-                      return _vm.setDataValues($event)
-                    },
                     input: function($event) {
                       if ($event.target.composing) {
                         return
@@ -38980,7 +38929,63 @@ var render = function() {
                   }
                 }),
                 _vm._v(" "),
+                _c("hr"),
+                _vm._v(" "),
+                _c("label", { staticClass: "col-form-label" }, [
+                  _vm._v("Replace in cells")
+                ]),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.replaceString,
+                      expression: "replaceString"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: {
+                    type: "text",
+                    name: "replace",
+                    placeholder: "Replace"
+                  },
+                  domProps: { value: _vm.replaceString },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.replaceString = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
                 _c("br"),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.replaceWith,
+                      expression: "replaceWith"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: { type: "text", name: "with", placeholder: "With" },
+                  domProps: { value: _vm.replaceWith },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.replaceWith = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c("hr"),
                 _vm._v(" "),
                 _c(
                   "button",
@@ -39005,7 +39010,7 @@ var render = function() {
                     attrs: { type: "button", "data-dismiss": "modal" },
                     on: {
                       click: function($event) {
-                        return _vm.changeName()
+                        return _vm.updateFeed()
                       }
                     }
                   },
@@ -39286,21 +39291,11 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
-      _c("grid", {
-        attrs: {
-          feedId: _vm.returnFeedId,
-          "column-edits": _vm.returnColumnEdits
-        }
-      }),
+      _c("grid", { attrs: { feedId: _vm.returnFeedId } }),
       _vm._v(" "),
       _c("edit-feed-modal-component", {
         attrs: { feedId: _vm.returnFeedId },
         on: { "updated-values": _vm.updateValuesAfterEdit }
-      }),
-      _vm._v(" "),
-      _c("edit-column-component", {
-        attrs: { feedId: _vm.returnFeedId },
-        on: { "update-columns": _vm.updateColumns }
       })
     ],
     1
@@ -39374,6 +39369,15 @@ var render = function() {
           columns: _vm.columns,
           resize: "true"
         }
+      }),
+      _vm._v(" "),
+      _c("edit-column-component", {
+        attrs: {
+          feedId: _vm.feedId,
+          openEditColumnModal: _vm.openEditColumnModal,
+          modal: _vm.modal
+        },
+        on: { "update-columns": _vm.updateColumns }
       })
     ],
     1

@@ -11,9 +11,8 @@
                 </a>
             </ul>
         </div>
-        <grid :feedId="returnFeedId" :column-edits="returnColumnEdits"/>
+        <grid :feedId="returnFeedId" />
         <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit" />
-        <edit-column-component :feedId="returnFeedId" @update-columns="updateColumns"/>
     </div>
 </template>
 
@@ -31,16 +30,12 @@ export default {
             feeds: [],
             feedId: null,
             firstClick: false,
-            columnEdits: 0
         }
     },
     computed: {
         returnFeedId() {
             return this.feedId;
         },
-        returnColumnEdits() {
-            return this.columnEdits
-        }
     },
     mounted() {
         axios
@@ -59,9 +54,6 @@ export default {
         updateValuesAfterEdit(newName) {
             document.getElementById(this.feedId).getElementsByTagName('span')[0].innerHTML = newName
         },
-        updateColumns() {
-            this.columnEdits++;
-        }
     }
 }
 </script>
