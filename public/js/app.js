@@ -2275,6 +2275,7 @@ __webpack_require__.r(__webpack_exports__);
   watch: {
     openEditColumnModal: function openEditColumnModal() {
       this.oldColumnName = document.querySelector("input[name='newColumnName']").value;
+      this.newColumnName = this.oldColumnName;
     }
   },
   methods: {
