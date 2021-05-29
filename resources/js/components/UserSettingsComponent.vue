@@ -9,8 +9,8 @@
                             <h3>{{ user.email }}</h3>
                             <div class="custom-file">
                                 <input type="file" id="file" ref="file" class="custom-file-input" v-on:change="handleFileUpload()">
-                                <label class="custom-file-label" for="file" id="fileNamePlaceholder" v-if="user.configFileName">{{ user.configFileName}}</label>
-                                <label class="custom-file-label" for="file" id="fileNamePlaceholder" v-else="user.config">Upload JSON configuration file</label>
+                                <label class="custom-file-label" for="file" v-if="user.configFileName">{{ user.configFileName}}</label>
+                                <label class="custom-file-label" for="file" v-else="user.config">Upload JSON configuration file</label>
                             </div>
 
                             <a href="#" class="btn btn-primary mt-2" @click="uploadFile">Save</a>
@@ -57,7 +57,7 @@ export default {
         },
         handleFileUpload(){
             this.file = this.$refs.file.files[0];
-            document.getElementById("fileNamePlaceholder").innerHTML = this.file.name
+            document.querySelector(".custom-file-label").innerHTML = this.file.name
         }
     }
 }

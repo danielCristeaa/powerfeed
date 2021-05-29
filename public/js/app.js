@@ -2678,7 +2678,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     handleFileUpload: function handleFileUpload() {
       this.file = this.$refs.file.files[0];
-      document.getElementById("fileNamePlaceholder").innerHTML = this.file.name;
+      document.querySelector(".custom-file-label").innerHTML = this.file.name;
     }
   }
 });
@@ -39545,7 +39545,7 @@ var render = function() {
                       "label",
                       {
                         staticClass: "custom-file-label",
-                        attrs: { for: "file", id: "fileNamePlaceholder" }
+                        attrs: { for: "file" }
                       },
                       [_vm._v(_vm._s(_vm.user.configFileName))]
                     )
@@ -39553,7 +39553,7 @@ var render = function() {
                       "label",
                       {
                         staticClass: "custom-file-label",
-                        attrs: { for: "file", id: "fileNamePlaceholder" }
+                        attrs: { for: "file" }
                       },
                       [_vm._v("Upload JSON configuration file")]
                     )
