@@ -23,6 +23,7 @@ Vue.component('example-component', require('./components/ExampleComponent.vue').
 Vue.component('grid-component', require('./components/GridComponent.vue').default);
 Vue.component('feedslist-component', require('./components/FeedsListComponent.vue').default);
 Vue.component('edit-column-component', require('./components/EditColumnModal.vue').default);
+Vue.component('user-settings-component', require('./components/UserSettingsComponent.vue').default);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
