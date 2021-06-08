@@ -6,6 +6,7 @@ use App\Models\Feed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use silici0\GoogleParserFeed\ParserGoogleFeed;
 
 class FeedController extends Controller
 {
@@ -39,19 +40,6 @@ class FeedController extends Controller
         return $feeds;
     }
 
-    private function parseXML($xml)
-    {
-        foreach ($xml->children() as $item)
-        {
-            $hasChild = count($item->children()) > 0;
-            if(!$hasChild)
-            {
-                $data = $this->parseXML($item);
-            }
-            $data[] = $item;
-        }
-        return $data;
-    }
     /**
      * Show the form for creating a new resource.
      *
@@ -59,19 +47,22 @@ class FeedController extends Controller
      */
     public function create(Request $request)
     {
-        $xml = simplexml_load_file($request->input('url'));
+        $xml = file_get_contents($request->input('url'));
         //TODO: check if url exists and is xml
         // ...
-        $xml_data = $this->parseXML($xml);
+        $xml_data = new ParserGoogleFeed($xml, LIBXML_NOCDATA);
+
         $feed = new Feed();
         $feed->name = $request->input('name');
         $feed->url = $request->input('url');
         $feed->user_id = Auth::id();
         $temp_array = [];
-        foreach($xml_data as $key => $item)
+
+        foreach($xml_data->toArray()['channel']->item as $item)
         {
-            $temp_array[$key] = $item;
+            $temp_array[] = $item;
         }
+
         $feed->products = $temp_array;
         $feed->save();
 

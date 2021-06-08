@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "77a47b45f1d7503b649d616ae5eeebd0",
+    "content-hash": "62df84006dbf6c2b99301941f9c18147",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3183,6 +3183,41 @@
                 }
             ],
             "time": "2020-08-18T17:17:46+00:00"
+        },
+        {
+            "name": "silici0/googleparserfeed",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/silici0/GoogleParserFeed.git",
+                "reference": "e60e2e5eacf20d36a78233fe29e144ce08a41af3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/silici0/GoogleParserFeed/zipball/e60e2e5eacf20d36a78233fe29e144ce08a41af3",
+                "reference": "e60e2e5eacf20d36a78233fe29e144ce08a41af3",
+                "shasum": ""
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "silici0\\GoogleParserFeed\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Rafael Cunha",
+                    "email": "silici0@gmail.com"
+                }
+            ],
+            "description": "Parser in PHP to Google Merchant Feed",
+            "support": {
+                "issues": "https://github.com/silici0/GoogleParserFeed/issues",
+                "source": "https://github.com/silici0/GoogleParserFeed/tree/master"
+            },
+            "time": "2020-11-18T15:01:03+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -8105,7 +8140,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "silici0/googleparserfeed": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
