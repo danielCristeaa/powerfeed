@@ -5,6 +5,7 @@
             :source="rows"
             :columns="columns"
             resize="true"
+            readonly="true"
         ></v-grid>
         <edit-column-component :feedId="feedId" :openEditColumnModal="openEditColumnModal" :modal="modal" @update-columns="updateColumns"/>
     </div>
