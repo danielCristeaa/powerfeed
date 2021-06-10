@@ -30,3 +30,5 @@ Route::put('/editColumn/{_id}', [App\Http\Controllers\FeedController::class, 'ed
 
 Route::get('/settings', [App\Http\Controllers\UserController::class, 'showSettings'])->name('settings');
 Route::post('/uploadConfigFile', [App\Http\Controllers\UserController::class, 'uploadConfigFile']);
+
+Route::post('/sendToGoogleMerchant', [App\Http\Middleware\GoogleMerchantFeed::class, 'sendToGoogleMerchant']);

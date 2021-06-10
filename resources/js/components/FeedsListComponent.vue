@@ -8,6 +8,7 @@
                 <a href="#" class="list-group-item list-group-item-action bg-light" :class="{ 'firstFeed' : feedId == feed['_id']}" @click="loadFeed(feed['_id'])" :id="feed['_id']" v-for="(feed, index) in feeds">
                     <span>{{ feed['name'] }}</span>
                     <a style="float:right" data-toggle="modal" data-target="#editFeedModal"><i class="fas fa-edit fa-lg"></i></a>
+                    <a style="float:right" @click="publish()"><i class="fas fa-lg fa-solid fa-paper-plane"></i></a>
                 </a>
             </ul>
         </div>
@@ -54,6 +55,17 @@ export default {
         updateValuesAfterEdit(newName) {
             document.getElementById(this.feedId).getElementsByTagName('span')[0].innerHTML = newName
         },
+        publish() {
+            axios
+                .post("/sendToGoogleMerchant", {
+                    feedId: this.feedId,
+
+                })
+                .then(response => {
+                    console.log(response.data)
+                })
+                .catch(error => console.log(error))
+        }
     }
 }
 </script>
@@ -61,5 +73,8 @@ export default {
 <style scoped>
 .firstFeed {
     background-color: #dae0e5 !important;
+}
+.fa-paper-plane {
+    margin-right: 3px;
 }
 </style>

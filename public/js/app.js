@@ -2462,6 +2462,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2498,6 +2499,15 @@ __webpack_require__.r(__webpack_exports__);
     },
     updateValuesAfterEdit: function updateValuesAfterEdit(newName) {
       document.getElementById(this.feedId).getElementsByTagName('span')[0].innerHTML = newName;
+    },
+    publish: function publish() {
+      axios.post("/sendToGoogleMerchant", {
+        feedId: this.feedId
+      }).then(function (response) {
+        console.log(response.data);
+      })["catch"](function (error) {
+        return console.log(error);
+      });
     }
   }
 });
@@ -2515,6 +2525,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _revolist_vue_datagrid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @revolist/vue-datagrid */ "./node_modules/@revolist/vue-datagrid/dist/vgrid.js");
 /* harmony import */ var _revolist_vue_datagrid__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_revolist_vue_datagrid__WEBPACK_IMPORTED_MODULE_0__);
+//
 //
 //
 //
@@ -2651,11 +2662,19 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "UserSettingsComponent",
   data: function data() {
     return {
-      file: ''
+      file: '',
+      merchantId: null
     };
   },
   props: {
@@ -2663,11 +2682,22 @@ __webpack_require__.r(__webpack_exports__);
       required: true
     }
   },
+  mounted: function mounted() {
+    this.merchantId = this.user['merchantId'];
+  },
   methods: {
-    uploadFile: function uploadFile() {
+    saveChanges: function saveChanges() {
       var formData = new FormData();
-      formData.append('fileName', this.file.name);
-      formData.append('file', this.file);
+
+      if (this.file) {
+        formData.append('fileName', this.file.name);
+        formData.append('file', this.file);
+      }
+
+      if (this.merchantId) {
+        formData.append('merchantId', this.merchantId);
+      }
+
       axios.post('/uploadConfigFile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -7125,7 +7155,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.firstFeed[data-v-2b5603d6] {\r\n    background-color: #dae0e5 !important;\n}\r\n", ""]);
+exports.push([module.i, "\n.firstFeed[data-v-2b5603d6] {\n    background-color: #dae0e5 !important;\n}\n.fa-paper-plane[data-v-2b5603d6] {\n    margin-right: 3px;\n}\n", ""]);
 
 // exports
 
@@ -7144,7 +7174,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n#grid[data-v-fa23cf08] {\r\n    overflow-x: auto;\r\n    overflow-y: auto;\r\n    padding-right: 0;\n}\r\n", ""]);
+exports.push([module.i, "\n#grid[data-v-fa23cf08] {\n    overflow-x: auto;\n    overflow-y: auto;\n    padding-right: 0;\n}\n", ""]);
 
 // exports
 
@@ -39394,7 +39424,24 @@ var render = function() {
                   [
                     _c("span", [_vm._v(_vm._s(feed["name"]))]),
                     _vm._v(" "),
-                    _vm._m(1, true)
+                    _vm._m(1, true),
+                    _vm._v(" "),
+                    _c(
+                      "a",
+                      {
+                        staticStyle: { float: "right" },
+                        on: {
+                          click: function($event) {
+                            return _vm.publish()
+                          }
+                        }
+                      },
+                      [
+                        _c("i", {
+                          staticClass: "fas fa-lg fa-solid fa-paper-plane"
+                        })
+                      ]
+                    )
                   ]
                 )
               })
@@ -39476,7 +39523,8 @@ var render = function() {
           theme: "compact",
           source: _vm.rows,
           columns: _vm.columns,
-          resize: "true"
+          resize: "true",
+          readonly: "true"
         }
       }),
       _vm._v(" "),
@@ -39520,54 +39568,106 @@ var render = function() {
         _c("div", { staticClass: "col-md-8" }, [
           _c("div", { staticClass: "card" }, [
             _c("div", { staticClass: "card-body" }, [
-              _c("h3", [
-                _vm._v(
-                  _vm._s(_vm.user.first_name) + " " + _vm._s(_vm.user.last_name)
-                )
-              ]),
-              _vm._v(" "),
-              _c("h3", [_vm._v(_vm._s(_vm.user.email))]),
-              _vm._v(" "),
-              _c("div", { staticClass: "custom-file" }, [
-                _c("input", {
-                  ref: "file",
-                  staticClass: "custom-file-input",
-                  attrs: { type: "file", id: "file" },
-                  on: {
-                    change: function($event) {
-                      return _vm.handleFileUpload()
-                    }
-                  }
-                }),
+              _c("form", [
+                _c("h3", [
+                  _vm._v(
+                    _vm._s(_vm.user.first_name) +
+                      " " +
+                      _vm._s(_vm.user.last_name)
+                  )
+                ]),
                 _vm._v(" "),
-                _vm.user.configFileName
-                  ? _c(
-                      "label",
-                      {
-                        staticClass: "custom-file-label",
-                        attrs: { for: "file" }
-                      },
-                      [_vm._v(_vm._s(_vm.user.configFileName))]
-                    )
-                  : _c(
-                      "label",
-                      {
-                        staticClass: "custom-file-label",
-                        attrs: { for: "file" }
-                      },
-                      [_vm._v("Upload JSON configuration file")]
-                    )
-              ]),
-              _vm._v(" "),
-              _c(
-                "a",
-                {
-                  staticClass: "btn btn-primary mt-2",
-                  attrs: { href: "#" },
-                  on: { click: _vm.uploadFile }
-                },
-                [_vm._v("Save")]
-              )
+                _c("h3", [_vm._v(_vm._s(_vm.user.email))]),
+                _vm._v(" "),
+                _c("div", { staticClass: "form-group" }, [
+                  _c("div", { staticClass: "custom-file" }, [
+                    _c("input", {
+                      ref: "file",
+                      staticClass: "custom-file-input",
+                      attrs: { type: "file", id: "file" },
+                      on: {
+                        change: function($event) {
+                          return _vm.handleFileUpload()
+                        }
+                      }
+                    }),
+                    _vm._v(" "),
+                    _vm.user.configFileName
+                      ? _c(
+                          "label",
+                          {
+                            staticClass: "custom-file-label",
+                            attrs: { for: "file" }
+                          },
+                          [_vm._v(_vm._s(_vm.user.configFileName))]
+                        )
+                      : _c(
+                          "label",
+                          {
+                            staticClass: "custom-file-label",
+                            attrs: { for: "file" }
+                          },
+                          [_vm._v("Upload JSON configuration file")]
+                        )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "form-group" }, [
+                  _vm.user.merchantId
+                    ? _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.merchantId,
+                            expression: "merchantId"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: { type: "text" },
+                        domProps: { value: _vm.merchantId },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.merchantId = $event.target.value
+                          }
+                        }
+                      })
+                    : _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.merchantId,
+                            expression: "merchantId"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: { type: "text", placeholder: "Merchant ID" },
+                        domProps: { value: _vm.merchantId },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.merchantId = $event.target.value
+                          }
+                        }
+                      })
+                ]),
+                _vm._v(" "),
+                _c(
+                  "a",
+                  {
+                    staticClass: "btn btn-primary mt-2",
+                    attrs: { href: "#" },
+                    on: { click: _vm.saveChanges }
+                  },
+                  [_vm._v("Save")]
+                )
+              ])
             ])
           ])
         ])
