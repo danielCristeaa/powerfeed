@@ -26,13 +26,21 @@ class UserController extends Controller
      */
     public function uploadConfigFile(Request $request)
     {
-        $file = $request->file('file');
-        $content = file_get_contents($file->getRealPath());
-
         $userId = Auth::id();
         $user = User::where('_id', $userId)->first();
-        $user->config = $content;
-        $user->configFileName = $request->input('fileName');
+
+        if($request->file('file'))
+        {
+            $file = $request->file('file');
+            $content = file_get_contents($file->getRealPath());
+            $json_content = json_decode($content);
+            $user->config = $json_content;
+            $user->configFileName = $request->input('fileName');
+        }
+        if($request->input('merchantId'))
+        {
+            $user->merchantId = $request->input('merchantId');
+        }
         $user->save();
         return json_encode($user);
     }
