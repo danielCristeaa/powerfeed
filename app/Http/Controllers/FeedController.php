@@ -58,49 +58,22 @@ class FeedController extends Controller
         $feed->user_id = Auth::id();
         $temp_array = [];
 
-        foreach($xml_data->toArray()['channel']->item as $item)
-        {
+        foreach($xml_data->toArray()['channel']->item as $item) {
             $temp_array[] = $item;
         }
 
+        $originalFields = array_keys(get_object_vars($temp_array[0]));
+        $originalFieldsTempArray = [];
+        foreach($originalFields as $value) {
+            $originalFieldsTempArray[] = array($value => $value);
+        }
+
+        $feed->fields = $originalFieldsTempArray;
         $feed->products = $temp_array;
         $feed->save();
-
         return redirect()->route('feeds');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Feed  $feed
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Feed $feed)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Feed  $feed
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Feed $feed)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -138,8 +111,20 @@ class FeedController extends Controller
             $tempArray[] = $newArray;
         }
 
+        $originalFieldsTempArray = [];
+        foreach($updatedFeed->fields as $field) {
+            foreach($field as $key => $value) {
+                if($key == $deletedColumn) {
+                    continue;
+                }
+                $originalFieldsTempArray[] = array($key => $value);
+            }
+        }
+
         $updatedFeed->products = $tempArray;
+        $updatedFeed->fields = $originalFieldsTempArray;
         $updatedFeed->save();
+
         return json_encode($updatedFeed->products);
     }
 
@@ -160,6 +145,18 @@ class FeedController extends Controller
         $oldColumnName = $request->input('oldName');
         $newColumnName = $request->input('newName');
 
+        $originalFieldsTempArray = [];
+        foreach($updatedFeed->fields as $field) {
+            foreach($field as $key => $value) {
+                if($value == $oldColumnName) {
+                    $originalFieldsTempArray[] = array($key => $newColumnName);
+                }
+                else  {
+                    $originalFieldsTempArray[] = array($key => $value);
+                }
+            }
+        }
+
         $tempArray = [];
         foreach($updatedFeed->products as $product) {
             $newArray = $product;
@@ -178,6 +175,7 @@ class FeedController extends Controller
         }
 
         $updatedFeed->products = $tempArray;
+        $updatedFeed->fields = $originalFieldsTempArray;
         $updatedFeed->save();
         return json_encode($updatedFeed->products);
     }

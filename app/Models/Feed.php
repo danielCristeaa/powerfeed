@@ -29,5 +29,9 @@ class Feed extends Model
      * @var int|mixed|string
      */
     private $user_id;
+    /**
+     * @var array
+     */
+    private $fields;
 
 }
