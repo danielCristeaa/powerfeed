@@ -17,7 +17,10 @@ class UserController extends Controller
     {
         $userId = Auth::id();
         $user = User::where('_id', $userId)->first()->toJson();
-        return view('settings', ['user' => $user]);
+
+        $user = User::where('_id', Auth::id())->first();
+        $company_users = User::where('company_id', $user->company_id)->get()->toJson();
+        return view('settings', ['user' => $user, 'company_users' => $company_users]);
     }
 
     /**
@@ -43,5 +46,19 @@ class UserController extends Controller
         }
         $user->save();
         return json_encode($user);
+    }
+
+    public function delete(Request $request)
+    {
+        $userId = Auth::id();
+        if(!$userId) {
+            return;
+        }
+
+        $user = User::where('_id', $userId)->first();
+        if($user->is_admin) {
+            User::where('_id', $request->input('userId'))->delete();
+        }
+
     }
 }

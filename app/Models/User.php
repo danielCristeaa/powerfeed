@@ -23,6 +23,8 @@ class User extends Authenticatable
         'password',
         'config',
         'merchantId',
+        'company_id',
+        'is_admin'
     ];
 
     /**

@@ -71,6 +71,6 @@
         </div>
     </nav>
     <div id="app">
-        <user-settings-component :user='{{ $user }}'></user-settings-component>
+        <user-settings-component :user='{{ $user }}' :company_users='{{ $company_users }}'></user-settings-component>
     </div>
 </body>

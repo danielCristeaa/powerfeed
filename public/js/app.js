@@ -2690,6 +2690,20 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "UserSettingsComponent",
   data: function data() {
@@ -2700,6 +2714,9 @@ __webpack_require__.r(__webpack_exports__);
   },
   props: {
     user: {
+      required: true
+    },
+    company_users: {
       required: true
     }
   },
@@ -2730,6 +2747,15 @@ __webpack_require__.r(__webpack_exports__);
     handleFileUpload: function handleFileUpload() {
       this.file = this.$refs.file.files[0];
       document.querySelector(".custom-file-label").innerHTML = this.file.name;
+    },
+    deleteUser: function deleteUser(userId) {
+      axios.post('/deleteUser', {
+        userId: userId
+      }).then(function (response) {
+        window.location = '/settings';
+      })["catch"](function (error) {
+        console.log(error.response.data);
+      });
     }
   }
 });
@@ -39710,7 +39736,60 @@ var render = function() {
             ])
           ])
         ])
-      ])
+      ]),
+      _vm._v(" "),
+      _vm.user.is_admin == true
+        ? _c("div", { staticClass: "row justify-content-center" }, [
+            _c("div", { staticClass: "col-md-8" }, [
+              _c("div", { staticClass: "card" }, [
+                _c("div", { staticClass: "card-body" }, [
+                  _c(
+                    "form",
+                    [
+                      _c("h3", [_vm._v("Users")]),
+                      _vm._v(" "),
+                      _vm._l(_vm.company_users, function(user) {
+                        return _c("h4", [
+                          _vm._v(
+                            _vm._s(user.first_name) +
+                              " " +
+                              _vm._s(user.last_name) +
+                              " - " +
+                              _vm._s(user.email)
+                          ),
+                          user.is_admin == false
+                            ? _c(
+                                "a",
+                                {
+                                  staticStyle: { float: "right" },
+                                  on: {
+                                    click: function($event) {
+                                      return _vm.deleteUser(user._id)
+                                    }
+                                  }
+                                },
+                                [_c("i", { staticClass: "fas fa-trash-alt" })]
+                              )
+                            : _vm._e()
+                        ])
+                      }),
+                      _vm._v(" "),
+                      _c(
+                        "a",
+                        {
+                          staticClass: "btn btn-primary mt-2",
+                          attrs: { href: "/showAddUser" }
+                        },
+                        [_vm._v("Add user")]
+                      )
+                    ],
+                    2
+                  )
+                ])
+              ])
+            ])
+          ])
+        : _vm._e()
     ])
   ])
 }

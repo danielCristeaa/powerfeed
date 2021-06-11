@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\Feed;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,8 +18,8 @@ class FeedController extends Controller
      */
     public function index()
     {
-        $user_id = Auth::id();
-        $feeds = Feed::select('_id', 'name')->where('user_id', $user_id)->get()->toArray();
+        $user = User::where('_id', Auth::id())->first();
+        $feeds = Feed::select('_id', 'name')->where('company_id', $user->company_id)->get()->toArray();
 
         return view('home', ['feeds' => $feeds]);
     }
@@ -34,8 +36,8 @@ class FeedController extends Controller
 
     public function getUserFeeds()
     {
-        $user_id = Auth::id();
-        $feeds = Feed::select('_id', 'name')->where('user_id', $user_id)->get()->toArray();
+        $user = User::where('_id', Auth::id())->first();
+        $feeds = Feed::select('_id', 'name')->where('company_id', $user->company_id)->get()->toArray();
 
         return $feeds;
     }
@@ -55,7 +57,10 @@ class FeedController extends Controller
         $feed = new Feed();
         $feed->name = $request->input('name');
         $feed->url = $request->input('url');
-        $feed->user_id = Auth::id();
+
+        $user = User::where('_id', Auth::id())->first();
+        $company = Company::where('_id', $user->company_id)->first();
+        $feed->company_id = $company->id;
         $temp_array = [];
 
         foreach($xml_data->toArray()['channel']->item as $item) {

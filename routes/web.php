@@ -33,3 +33,7 @@ Route::get('/settings', [App\Http\Controllers\UserController::class, 'showSettin
 Route::post('/uploadConfigFile', [App\Http\Controllers\UserController::class, 'uploadConfigFile']);
 
 Route::post('/sendToGoogleMerchant', [App\Http\Middleware\GoogleMerchantFeed::class, 'sendToGoogleMerchant']);
+
+Route::get('/showAddUser', [App\Http\Controllers\Auth\AddUserToCompany::class, 'showAddUsers']);
+Route::post('/addUser', [App\Http\Controllers\Auth\AddUserToCompany::class, 'addUserToCompany']);
+Route::post('/deleteUser', [App\Http\Controllers\UserController::class, 'delete']);

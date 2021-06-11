@@ -12,6 +12,7 @@ class Feed extends Model
     protected $fillable = [
         'name',
         'link',
+        'company_id'
     ];
     /**
      * @var string
@@ -25,13 +26,15 @@ class Feed extends Model
      * @var array
      */
     private $products;
-    /**
-     * @var int|mixed|string
-     */
-    private $user_id;
+
     /**
      * @var array
      */
     private $fields;
+
+    /**
+     * @var string
+     */
+    private $company_id;
 
 }
