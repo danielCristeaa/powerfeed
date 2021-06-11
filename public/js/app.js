@@ -2463,6 +2463,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2474,12 +2475,16 @@ __webpack_require__.r(__webpack_exports__);
     return {
       feeds: [],
       feedId: null,
-      firstClick: false
+      firstClick: false,
+      refreshDataCounter: 0
     };
   },
   computed: {
     returnFeedId: function returnFeedId() {
       return this.feedId;
+    },
+    returnRefreshData: function returnRefreshData() {
+      return this.refreshDataCounter;
     }
   },
   mounted: function mounted() {
@@ -2508,6 +2513,10 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (error) {
         return console.log(error);
       });
+    },
+    refreshFeedData: function refreshFeedData() {
+      this.refreshDataCounter++;
+      console.log(this.refreshDataCounter);
     }
   }
 });
@@ -2544,6 +2553,9 @@ __webpack_require__.r(__webpack_exports__);
   name: "Grid",
   props: {
     feedId: {
+      required: true
+    },
+    refreshDataCounter: {
       required: true
     }
   },
@@ -2620,6 +2632,15 @@ __webpack_require__.r(__webpack_exports__);
     feedId: function feedId(id) {
       this.feedId = id;
       this.updateColumns();
+    },
+    refreshDataCounter: function refreshDataCounter() {
+      var _this = this;
+
+      axios.get("/refreshData/" + this.feedId).then(function (response) {
+        _this.updateColumns();
+      })["catch"](function (error) {
+        return console.log(error);
+      });
     }
   },
   components: {
@@ -7155,7 +7176,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.firstFeed[data-v-2b5603d6] {\n    background-color: #dae0e5 !important;\n}\n.fa-paper-plane[data-v-2b5603d6] {\n    margin-right: 3px;\n}\n", ""]);
+exports.push([module.i, "\n.firstFeed[data-v-2b5603d6] {\n    background-color: #dae0e5 !important;\n}\n.fa-sync[data-v-2b5603d6], .fa-paper-plane[data-v-2b5603d6] {\n    margin-right: 6px;\n}\n", ""]);
 
 // exports
 
@@ -39432,6 +39453,19 @@ var render = function() {
                         staticStyle: { float: "right" },
                         on: {
                           click: function($event) {
+                            return _vm.refreshFeedData()
+                          }
+                        }
+                      },
+                      [_c("i", { staticClass: "fas fa-lg fa-sync" })]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "a",
+                      {
+                        staticStyle: { float: "right" },
+                        on: {
+                          click: function($event) {
                             return _vm.publish()
                           }
                         }
@@ -39451,7 +39485,12 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
-      _c("grid", { attrs: { feedId: _vm.returnFeedId } }),
+      _c("grid", {
+        attrs: {
+          feedId: _vm.returnFeedId,
+          refreshDataCounter: _vm.returnRefreshData
+        }
+      }),
       _vm._v(" "),
       _c("edit-feed-modal-component", {
         attrs: { feedId: _vm.returnFeedId },
