@@ -2357,6 +2357,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "EditFeedModalComponent",
   props: {
@@ -2394,6 +2395,14 @@ __webpack_require__.r(__webpack_exports__);
         console.log(error.response.data);
       });
       this.$emit('updated-values', this.newName);
+    },
+    deleteFeed: function deleteFeed() {
+      var self = this;
+      axios.post('/deleteFeed/' + this.feedId).then(function (response) {
+        self.$emit('deleted-feed');
+      })["catch"](function (error) {
+        console.log(error.response.data);
+      });
     }
   }
 });
@@ -2488,16 +2497,19 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   mounted: function mounted() {
-    var _this = this;
-
-    axios.get("/getUserFeeds").then(function (response) {
-      _this.feeds = response.data;
-      _this.feedId = _this.feeds[0]['_id'];
-    })["catch"](function (error) {
-      return console.log(error);
-    });
+    this.getUserFeeds();
   },
   methods: {
+    getUserFeeds: function getUserFeeds() {
+      var _this = this;
+
+      axios.get("/getUserFeeds").then(function (response) {
+        _this.feeds = response.data;
+        _this.feedId = _this.feeds[0]['_id'];
+      })["catch"](function (error) {
+        return console.log(error);
+      });
+    },
     loadFeed: function loadFeed(id) {
       this.feedId = id;
       this.firstClick = true;
@@ -39331,6 +39343,20 @@ var render = function() {
                     }
                   },
                   [_vm._v("Submit")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-danger",
+                    attrs: { type: "button", "data-dismiss": "modal" },
+                    on: {
+                      click: function($event) {
+                        return _vm.deleteFeed()
+                      }
+                    }
+                  },
+                  [_vm._v("Delete feed")]
                 )
               ])
             ])
@@ -39520,7 +39546,10 @@ var render = function() {
       _vm._v(" "),
       _c("edit-feed-modal-component", {
         attrs: { feedId: _vm.returnFeedId },
-        on: { "updated-values": _vm.updateValuesAfterEdit }
+        on: {
+          "updated-values": _vm.updateValuesAfterEdit,
+          "deleted-feed": _vm.getUserFeeds
+        }
       })
     ],
     1

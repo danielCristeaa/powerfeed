@@ -21,6 +21,7 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             <button type="button" class="btn btn-primary" @click="sendData()" data-dismiss="modal">Submit</button>
+                            <button type="button" class="btn btn-danger" @click="deleteFeed()" data-dismiss="modal">Delete feed</button>
                         </div>
                     </div>
                 </div>
@@ -69,6 +70,17 @@ export default {
                 })
 
             this.$emit('updated-values', this.newName)
+        },
+        deleteFeed() {
+            const self = this;
+            axios
+                .post('/deleteFeed/'+this.feedId)
+                .then(function (response){
+                    self.$emit('deleted-feed')
+                })
+                .catch(function (error){
+                    console.log(error.response.data)
+                })
         }
     }
 }

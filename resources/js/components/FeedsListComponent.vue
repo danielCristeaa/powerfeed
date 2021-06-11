@@ -14,7 +14,7 @@
             </ul>
         </div>
         <grid :feedId="returnFeedId" :refreshDataCounter="returnRefreshData" />
-        <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit" />
+        <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit" @deleted-feed="getUserFeeds"/>
     </div>
 </template>
 
@@ -44,15 +44,18 @@ export default {
         }
     },
     mounted() {
-        axios
-            .get("/getUserFeeds")
-            .then(response => {
-                this.feeds = response.data
-                this.feedId = this.feeds[0]['_id']
-            })
-            .catch(error => console.log(error))
+        this.getUserFeeds()
     },
     methods: {
+        getUserFeeds() {
+            axios
+                .get("/getUserFeeds")
+                .then(response => {
+                    this.feeds = response.data
+                    this.feedId = this.feeds[0]['_id']
+                })
+                .catch(error => console.log(error))
+        },
         loadFeed(id) {
             this.feedId = id;
             this.firstClick = true;

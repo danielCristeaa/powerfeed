@@ -28,6 +28,7 @@ Route::post('/editFeed/{_id}', [App\Http\Controllers\FeedController::class, 'upd
 Route::put('/deleteColumn/{_id}', [App\Http\Controllers\FeedController::class, 'deleteColumn']);
 Route::put('/editColumn/{_id}', [App\Http\Controllers\FeedController::class, 'editColumn']);
 Route::get('/refreshData/{id}', [App\Http\Controllers\FeedController::class, 'refreshFeedData']);
+Route::post('/deleteFeed/{id}', [App\Http\Controllers\FeedController::class, 'delete']);
 
 Route::get('/settings', [App\Http\Controllers\UserController::class, 'showSettings'])->name('settings');
 Route::post('/uploadConfigFile', [App\Http\Controllers\UserController::class, 'uploadConfigFile']);

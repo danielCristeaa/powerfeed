@@ -202,11 +202,16 @@ class FeedController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Feed  $feed
+     * @param integer $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Feed $feed)
+    public function delete($id)
     {
-        //
+        $userId = Auth::id();
+        if(!$userId) {
+            return;
+        }
+
+        Feed::where('_id', $id)->delete();
     }
 }
