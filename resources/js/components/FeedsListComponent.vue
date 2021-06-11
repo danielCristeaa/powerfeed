@@ -8,11 +8,12 @@
                 <a href="#" class="list-group-item list-group-item-action bg-light" :class="{ 'firstFeed' : feedId == feed['_id']}" @click="loadFeed(feed['_id'])" :id="feed['_id']" v-for="(feed, index) in feeds">
                     <span>{{ feed['name'] }}</span>
                     <a style="float:right" data-toggle="modal" data-target="#editFeedModal"><i class="fas fa-edit fa-lg"></i></a>
+                    <a style="float:right" @click="refreshFeedData()"><i class="fas fa-lg fa-sync"></i></a>
                     <a style="float:right" @click="publish()"><i class="fas fa-lg fa-solid fa-paper-plane"></i></a>
                 </a>
             </ul>
         </div>
-        <grid :feedId="returnFeedId" />
+        <grid :feedId="returnFeedId" :refreshDataCounter="returnRefreshData" />
         <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit" />
     </div>
 </template>
@@ -31,12 +32,16 @@ export default {
             feeds: [],
             feedId: null,
             firstClick: false,
+            refreshDataCounter: 0,
         }
     },
     computed: {
         returnFeedId() {
             return this.feedId;
         },
+        returnRefreshData() {
+            return this.refreshDataCounter
+        }
     },
     mounted() {
         axios
@@ -65,6 +70,10 @@ export default {
                     console.log(response.data)
                 })
                 .catch(error => console.log(error))
+        },
+        refreshFeedData() {
+          this.refreshDataCounter++;
+          console.log(this.refreshDataCounter)
         }
     }
 }
@@ -74,7 +83,7 @@ export default {
 .firstFeed {
     background-color: #dae0e5 !important;
 }
-.fa-paper-plane {
-    margin-right: 3px;
+.fa-sync, .fa-paper-plane {
+    margin-right: 6px;
 }
 </style>

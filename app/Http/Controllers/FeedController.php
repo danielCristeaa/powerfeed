@@ -65,7 +65,7 @@ class FeedController extends Controller
         $originalFields = array_keys(get_object_vars($temp_array[0]));
         $originalFieldsTempArray = [];
         foreach($originalFields as $value) {
-            $originalFieldsTempArray[] = array($value => $value);
+            $originalFieldsTempArray[$value] = $value;
         }
 
         $feed->fields = $originalFieldsTempArray;
@@ -111,15 +111,8 @@ class FeedController extends Controller
             $tempArray[] = $newArray;
         }
 
-        $originalFieldsTempArray = [];
-        foreach($updatedFeed->fields as $field) {
-            foreach($field as $key => $value) {
-                if($key == $deletedColumn) {
-                    continue;
-                }
-                $originalFieldsTempArray[] = array($key => $value);
-            }
-        }
+        $originalFieldsTempArray = $updatedFeed->fields;
+        unset($originalFieldsTempArray[$deletedColumn]);
 
         $updatedFeed->products = $tempArray;
         $updatedFeed->fields = $originalFieldsTempArray;
@@ -145,17 +138,9 @@ class FeedController extends Controller
         $oldColumnName = $request->input('oldName');
         $newColumnName = $request->input('newName');
 
-        $originalFieldsTempArray = [];
-        foreach($updatedFeed->fields as $field) {
-            foreach($field as $key => $value) {
-                if($value == $oldColumnName) {
-                    $originalFieldsTempArray[] = array($key => $newColumnName);
-                }
-                else  {
-                    $originalFieldsTempArray[] = array($key => $value);
-                }
-            }
-        }
+        $originalFieldsTempArray = $updatedFeed->fields;
+        $originalColumnName = array_search($oldColumnName, $originalFieldsTempArray);
+        $originalFieldsTempArray[$originalColumnName] = $newColumnName;
 
         $tempArray = [];
         foreach($updatedFeed->products as $product) {
@@ -179,6 +164,36 @@ class FeedController extends Controller
         $updatedFeed->save();
         return json_encode($updatedFeed->products);
     }
+
+    public function refreshFeedData($id)
+    {
+        $feed = Feed::where('_id', $id)->first();
+
+        $xml = file_get_contents($feed->url);
+        $xml_data = new ParserGoogleFeed($xml, LIBXML_NOCDATA);
+
+        $tempArray = [];
+        foreach($xml_data->toArray()['channel']->item as $item) {
+            $tempArray[] = $item;
+        }
+
+        $productsWithEditedFields = [];
+        foreach($tempArray as $item) {
+            $newArray = [];
+            foreach($item as $key => $value) {
+                if(!in_array($key, array_keys($feed->fields))) {
+                    continue;
+                }
+                $newArray[$feed->fields[$key]] = $value;
+            }
+            $productsWithEditedFields[] = $newArray;
+        }
+
+        $feed->products = $productsWithEditedFields;
+        $feed->save();
+        return json_encode($productsWithEditedFields);
+    }
+
     /**
      * Remove the specified resource from storage.
      *

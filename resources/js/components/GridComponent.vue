@@ -21,6 +21,9 @@ export default {
     props: {
         feedId: {
             required: true
+        },
+        refreshDataCounter: {
+            required: true
         }
     },
     data() {
@@ -100,6 +103,14 @@ export default {
         feedId: function (id) {
             this.feedId = id
             this.updateColumns()
+        },
+        refreshDataCounter: function() {
+            axios
+                .get("/refreshData/" + this.feedId)
+                .then(response => {
+                    this.updateColumns()
+                })
+                .catch(error => console.log(error))
         }
     },
     components: {
