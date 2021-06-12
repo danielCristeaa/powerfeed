@@ -101,6 +101,39 @@ class FeedController extends Controller
 
         $updatedFeed->name = $request->input('name');
         $updatedFeed->url = $request->input('url');
+        $updatedFeed->merchantId = $request->input('merchantId');
+
+        $file = $request->file('file');
+        if($file) {
+            $content = file_get_contents($file->getRealPath());
+            $json_content = json_decode($content);
+            $updatedFeed->config = $json_content;
+            $updatedFeed->configFileName = $request->input('fileName');
+        }
+
+        if($request->input('addColumns') > 0){
+            $newFields = $updatedFeed->fields;
+            foreach ($newFields as $field => $value) {
+                if(strpos($field, 'new_column_') !== false) {
+                    return response()->json(['error' => "Error! You you have to rename the $field column before adding another one"]);
+                }
+            }
+
+            for($i = 0; $i<$request->input('addColumns'); $i++) {
+                $newFields["new_column_$i"] = "new_column_$i";
+            }
+
+            $updatedFeed->fields = $newFields;
+
+            $newProducts = $updatedFeed->products;
+            foreach($newProducts as &$product) {
+                for($i = 0; $i<$request->input('addColumns'); $i++) {
+                    $product["new_column_$i"] = "";
+                }
+            }
+
+            $updatedFeed->products = $newProducts;
+        }
 
         $updatedFeed->save();
         return json_encode($updatedFeed);
@@ -153,7 +186,13 @@ class FeedController extends Controller
 
         $originalFieldsTempArray = $updatedFeed->fields;
         $originalColumnName = array_search($oldColumnName, $originalFieldsTempArray);
-        $originalFieldsTempArray[$originalColumnName] = $newColumnName;
+        if(strpos($originalColumnName, 'new_column_') !== false) {
+            $originalFieldsTempArray[$newColumnName] = $newColumnName;
+            unset($originalFieldsTempArray[$originalColumnName]);
+        }
+        else {
+            $originalFieldsTempArray[$originalColumnName] = $newColumnName;
+        }
 
         $tempArray = [];
         foreach($updatedFeed->products as $product) {
@@ -207,6 +246,13 @@ class FeedController extends Controller
             $productsWithEditedFields[] = $newArray;
         }
 
+        foreach($feed->fields as $field => $value) {
+            foreach($productsWithEditedFields as &$product) {
+                if(array_key_exists($field, $product) == false) {
+                    $product[$value] = "";
+                }
+            }
+        }
         $feed->products = $productsWithEditedFields;
         $feed->save();
         return json_encode($productsWithEditedFields);

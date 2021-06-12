@@ -13,8 +13,8 @@
                 </a>
             </ul>
         </div>
-        <grid :feedId="returnFeedId" :refreshDataCounter="returnRefreshData" />
-        <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit" @deleted-feed="getUserFeeds"/>
+        <grid :feedId="returnFeedId" :refreshDataCounter="returnRefreshData" :queryDbDataCounter="returnQueryDbDataCounter" />
+        <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit" @deleted-feed="getUserFeeds" @new-columns-added="newColumnsAdded"/>
         <add-feed-component @new-feed="getUserFeeds"/>
     </div>
 </template>
@@ -34,6 +34,7 @@ export default {
             feedId: null,
             firstClick: false,
             refreshDataCounter: 0,
+            queryDbDataCounter: 0,
         }
     },
     computed: {
@@ -42,6 +43,9 @@ export default {
         },
         returnRefreshData() {
             return this.refreshDataCounter
+        },
+        returnQueryDbDataCounter() {
+            return this.queryDbDataCounter
         }
     },
     mounted() {
@@ -77,7 +81,9 @@ export default {
         },
         refreshFeedData() {
           this.refreshDataCounter++;
-          console.log(this.refreshDataCounter)
+        },
+        newColumnsAdded() {
+            this.queryDbDataCounter++
         }
     }
 }

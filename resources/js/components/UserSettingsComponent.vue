@@ -34,7 +34,6 @@ export default {
     name: "UserSettingsComponent",
     data() {
         return {
-            file: '',
             merchantId: null
         }
     },
@@ -46,42 +45,7 @@ export default {
             required: true
         },
     },
-    mounted() {
-        this.merchantId = this.user['merchantId']
-    },
     methods: {
-        saveChanges(){
-            let formData = new FormData()
-
-            if(this.file)
-            {
-                formData.append('fileName', this.file.name)
-                formData.append('file', this.file)
-            }
-            if(this.merchantId)
-            {
-                formData.append('merchantId', this.merchantId)
-            }
-
-            axios
-                .post( '/uploadConfigFile',
-                    formData,
-                    {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    }
-                )
-                .then(function (response){
-                })
-                .catch(function (error){
-                    console.log(error)
-                })
-        },
-        handleFileUpload(){
-            this.file = this.$refs.file.files[0];
-            document.querySelector(".custom-file-label").innerHTML = this.file.name
-        },
         deleteUser(userId) {
             axios
                 .post('/deleteUser', {

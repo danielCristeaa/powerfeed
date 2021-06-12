@@ -63,8 +63,6 @@ export default {
     methods: {
         updateFeed() {
             const self = this
-            console.log("abcd"+this.replaceString+"abcd")
-            console.log("abcd"+this.replaceWith+"abcd")
             axios
                 .put("/editColumn/"+this.feedId, {
                     replace: encodeURI(this.replaceString),
@@ -75,10 +73,9 @@ export default {
                 }, )
                 .then(function (response){
                     self.$emit('update-columns')
-                    console.log(response.data)
                 })
                 .catch(function (error){
-                    console.log(error)
+                    console.log(error.message)
                 })
 
             this.hideModal()

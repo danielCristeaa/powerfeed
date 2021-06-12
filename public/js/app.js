@@ -2367,8 +2367,6 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     updateFeed: function updateFeed() {
       var self = this;
-      console.log("abcd" + this.replaceString + "abcd");
-      console.log("abcd" + this.replaceWith + "abcd");
       axios.put("/editColumn/" + this.feedId, {
         replace: encodeURI(this.replaceString),
         "with": encodeURI(this.replaceWith),
@@ -2377,9 +2375,8 @@ __webpack_require__.r(__webpack_exports__);
         oldName: this.oldColumnName
       }).then(function (response) {
         self.$emit('update-columns');
-        console.log(response.data);
       })["catch"](function (error) {
-        console.log(error);
+        console.log(error.message);
       });
       this.hideModal();
     },
@@ -2458,6 +2455,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "EditFeedModalComponent",
   props: {
@@ -2471,7 +2479,8 @@ __webpack_require__.r(__webpack_exports__);
       newUrl: null,
       config: null,
       configFileName: null,
-      merchantId: null
+      merchantId: null,
+      addColumns: 0
     };
   },
   watch: {
@@ -2490,15 +2499,31 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     sendData: function sendData() {
-      axios.post("/editFeed/" + this.feedId, {
-        name: this.newName,
-        url: this.newUrl
+      var self = this;
+      var formData = new FormData();
+      formData.append('name', this.newName);
+      formData.append('url', this.newUrl);
+      formData.append('merchantId', this.merchantId);
+      formData.append('addColumns', this.addColumns);
+
+      if (this.file) {
+        formData.append('fileName', this.file.name);
+        formData.append('file', this.file);
+      }
+
+      axios.post("/editFeed/" + this.feedId, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       }).then(function (response) {
-        //display and alert with a success message
-        console.log(response);
+        if ("error" in response.data) {
+          console.log(response.data);
+        } else if (self.addColumns > 0) {
+          self.$emit('new-columns-added');
+        }
       })["catch"](function (error) {
         //display an alert with an error message
-        console.log(error.response.data);
+        console.log(error);
       });
       this.$emit('updated-values', this.newName);
     },
@@ -2596,7 +2621,8 @@ __webpack_require__.r(__webpack_exports__);
       feeds: [],
       feedId: null,
       firstClick: false,
-      refreshDataCounter: 0
+      refreshDataCounter: 0,
+      queryDbDataCounter: 0
     };
   },
   computed: {
@@ -2605,6 +2631,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     returnRefreshData: function returnRefreshData() {
       return this.refreshDataCounter;
+    },
+    returnQueryDbDataCounter: function returnQueryDbDataCounter() {
+      return this.queryDbDataCounter;
     }
   },
   mounted: function mounted() {
@@ -2639,7 +2668,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     refreshFeedData: function refreshFeedData() {
       this.refreshDataCounter++;
-      console.log(this.refreshDataCounter);
+    },
+    newColumnsAdded: function newColumnsAdded() {
+      this.queryDbDataCounter++;
     }
   }
 });
@@ -2679,6 +2710,9 @@ __webpack_require__.r(__webpack_exports__);
       required: true
     },
     refreshDataCounter: {
+      required: true
+    },
+    queryDbDataCounter: {
       required: true
     }
   },
@@ -2764,6 +2798,9 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (error) {
         return console.log(error);
       });
+    },
+    queryDbDataCounter: function queryDbDataCounter() {
+      this.updateColumns();
     }
   },
   components: {
@@ -2817,7 +2854,6 @@ __webpack_require__.r(__webpack_exports__);
   name: "UserSettingsComponent",
   data: function data() {
     return {
-      file: '',
       merchantId: null
     };
   },
@@ -2829,34 +2865,7 @@ __webpack_require__.r(__webpack_exports__);
       required: true
     }
   },
-  mounted: function mounted() {
-    this.merchantId = this.user['merchantId'];
-  },
   methods: {
-    saveChanges: function saveChanges() {
-      var formData = new FormData();
-
-      if (this.file) {
-        formData.append('fileName', this.file.name);
-        formData.append('file', this.file);
-      }
-
-      if (this.merchantId) {
-        formData.append('merchantId', this.merchantId);
-      }
-
-      axios.post('/uploadConfigFile', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }).then(function (response) {})["catch"](function (error) {
-        console.log(error);
-      });
-    },
-    handleFileUpload: function handleFileUpload() {
-      this.file = this.$refs.file.files[0];
-      document.querySelector(".custom-file-label").innerHTML = this.file.name;
-    },
     deleteUser: function deleteUser(userId) {
       axios.post('/deleteUser', {
         userId: userId
@@ -39622,6 +39631,10 @@ var render = function() {
               ]),
               _vm._v(" "),
               _c("div", { staticClass: "form-group" }, [
+                _c("label", { staticClass: "col-form-label" }, [
+                  _vm._v("JSON config file")
+                ]),
+                _vm._v(" "),
                 _c("div", { staticClass: "custom-file" }, [
                   _c("input", {
                     ref: "file",
@@ -39651,6 +39664,10 @@ var render = function() {
               ]),
               _vm._v(" "),
               _c("div", { staticClass: "form-group" }, [
+                _c("label", { staticClass: "col-form-label" }, [
+                  _vm._v("Merchant ID")
+                ]),
+                _vm._v(" "),
                 _vm.merchantId
                   ? _c("input", {
                       directives: [
@@ -39694,6 +39711,52 @@ var render = function() {
                         }
                       }
                     })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "form-group" }, [
+                _c(
+                  "select",
+                  {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.addColumns,
+                        expression: "addColumns"
+                      }
+                    ],
+                    staticClass: "custom-select",
+                    attrs: { "aria-label": "Add columns" },
+                    on: {
+                      change: function($event) {
+                        var $$selectedVal = Array.prototype.filter
+                          .call($event.target.options, function(o) {
+                            return o.selected
+                          })
+                          .map(function(o) {
+                            var val = "_value" in o ? o._value : o.value
+                            return val
+                          })
+                        _vm.addColumns = $event.target.multiple
+                          ? $$selectedVal
+                          : $$selectedVal[0]
+                      }
+                    }
+                  },
+                  [
+                    _c("option", { attrs: { selected: "", value: "0" } }, [
+                      _vm._v("Add columns at the end of the feed")
+                    ]),
+                    _vm._v(" "),
+                    _c("option", { attrs: { value: "1" } }, [_vm._v("1")]),
+                    _vm._v(" "),
+                    _c("option", { attrs: { value: "2" } }, [_vm._v("2")]),
+                    _vm._v(" "),
+                    _c("option", { attrs: { value: "3" } }, [_vm._v("3")]),
+                    _vm._v(" "),
+                    _c("option", { attrs: { value: "4" } }, [_vm._v("4")])
+                  ]
+                )
               ]),
               _vm._v(" "),
               _c("div", { staticClass: "modal-footer" }, [
@@ -39915,7 +39978,8 @@ var render = function() {
       _c("grid", {
         attrs: {
           feedId: _vm.returnFeedId,
-          refreshDataCounter: _vm.returnRefreshData
+          refreshDataCounter: _vm.returnRefreshData,
+          queryDbDataCounter: _vm.returnQueryDbDataCounter
         }
       }),
       _vm._v(" "),
@@ -39923,7 +39987,8 @@ var render = function() {
         attrs: { feedId: _vm.returnFeedId },
         on: {
           "updated-values": _vm.updateValuesAfterEdit,
-          "deleted-feed": _vm.getUserFeeds
+          "deleted-feed": _vm.getUserFeeds,
+          "new-columns-added": _vm.newColumnsAdded
         }
       }),
       _vm._v(" "),

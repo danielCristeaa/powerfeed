@@ -24,6 +24,9 @@ export default {
         },
         refreshDataCounter: {
             required: true
+        },
+        queryDbDataCounter: {
+            required: true
         }
     },
     data() {
@@ -111,6 +114,9 @@ export default {
                     this.updateColumns()
                 })
                 .catch(error => console.log(error))
+        },
+        queryDbDataCounter: function() {
+            this.updateColumns()
         }
     },
     components: {

@@ -19,6 +19,7 @@
                             <input type="text" class="form-control" name="url" v-model="newUrl">
                         </div>
                         <div class="form-group">
+                            <label class="col-form-label">JSON config file</label>
                             <div class="custom-file">
                                 <input type="file" id="file" ref="file" class="custom-file-input" v-on:change="handleFileUpload">
                                 <label class="custom-file-label" for="file" v-if="configFileName">{{ configFileName}}</label>
@@ -26,8 +27,18 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label class="col-form-label">Merchant ID</label>
                             <input type="text" class="form-control" v-if="merchantId" v-model="merchantId">
                             <input type="text" class="form-control" v-else v-model="merchantId" placeholder="Merchant ID">
+                        </div>
+                        <div class="form-group">
+                            <select class="custom-select" aria-label="Add columns" v-model="addColumns">
+                                <option selected value="0">Add columns at the end of the feed</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -55,7 +66,8 @@ export default {
           newUrl: null,
           config: null,
           configFileName: null,
-          merchantId: null
+          merchantId: null,
+          addColumns: 0
       }
     },
     watch: {
@@ -74,16 +86,38 @@ export default {
     },
     methods: {
         sendData() {
-            axios
-                .post("/editFeed/"+this.feedId, {name: this.newName, url: this.newUrl})
-                .then(function (response){
-                    //display and alert with a success message
-                    console.log(response)
+            const self = this
+            let formData = new FormData()
+            formData.append('name', this.newName)
+            formData.append('url', this.newUrl)
+            formData.append('merchantId', this.merchantId)
+            formData.append('addColumns', this.addColumns)
 
+            if(this.file) {
+                formData.append('fileName', this.file.name)
+                formData.append('file', this.file)
+            }
+
+            axios
+                .post("/editFeed/"+this.feedId,
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                )
+                .then(function (response){
+                    if("error" in response.data){
+                        console.log(response.data)
+                    }
+                    else if(self.addColumns > 0) {
+                        self.$emit('new-columns-added')
+                    }
                 })
                 .catch(function (error){
                     //display an alert with an error message
-                    console.log(error.response.data)
+                    console.log(error)
                 })
 
             this.$emit('updated-values', this.newName)
