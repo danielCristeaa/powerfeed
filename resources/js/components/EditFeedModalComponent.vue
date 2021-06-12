@@ -18,6 +18,17 @@
                             <label class="col-form-label">URL</label>
                             <input type="text" class="form-control" name="url" v-model="newUrl">
                         </div>
+                        <div class="form-group">
+                            <div class="custom-file">
+                                <input type="file" id="file" ref="file" class="custom-file-input" v-on:change="handleFileUpload">
+                                <label class="custom-file-label" for="file" v-if="configFileName">{{ configFileName}}</label>
+                                <label class="custom-file-label" for="file" v-else>Upload JSON configuration file</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" v-if="merchantId" v-model="merchantId">
+                            <input type="text" class="form-control" v-else v-model="merchantId" placeholder="Merchant ID">
+                        </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             <button type="button" class="btn btn-primary" @click="sendData()" data-dismiss="modal">Submit</button>
@@ -42,6 +53,9 @@ export default {
       return {
           newName: null,
           newUrl: null,
+          config: null,
+          configFileName: null,
+          merchantId: null
       }
     },
     watch: {
@@ -52,6 +66,9 @@ export default {
                 .then(response => {
                     this.newName = response.data[2]
                     this.newUrl = response.data[3]
+                    this.config = response.data[4]
+                    this.configFileName = response.data[5]
+                    this.merchantId = response.data[6]
                 })
         }
     },
@@ -81,7 +98,11 @@ export default {
                 .catch(function (error){
                     console.log(error.response.data)
                 })
-        }
+        },
+        handleFileUpload(){
+            this.file = this.$refs.file.files[0];
+            document.querySelector(".custom-file-label").innerHTML = this.file.name
+        },
     }
 }
 </script>

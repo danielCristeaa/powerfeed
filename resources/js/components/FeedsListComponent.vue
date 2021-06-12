@@ -15,6 +15,7 @@
         </div>
         <grid :feedId="returnFeedId" :refreshDataCounter="returnRefreshData" />
         <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit" @deleted-feed="getUserFeeds"/>
+        <add-feed-component @new-feed="getUserFeeds"/>
     </div>
 </template>
 

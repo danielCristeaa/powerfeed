@@ -31,7 +31,7 @@ class FeedController extends Controller
         foreach($feed['products'][0] as $property => $value) {
             $columns[] = $property;
         }
-        return [$columns, $feed['products'], $feed['name'], $feed['url']];
+        return [$columns, $feed['products'], $feed['name'], $feed['url'], $feed['config'], $feed['configFileName'], $feed['merchantId']];
     }
 
     public function getUserFeeds()
@@ -57,6 +57,14 @@ class FeedController extends Controller
         $feed = new Feed();
         $feed->name = $request->input('name');
         $feed->url = $request->input('url');
+
+        $file = $request->file('file');
+        $content = file_get_contents($file->getRealPath());
+        $json_content = json_decode($content);
+        $feed->config = $json_content;
+        $feed->configFileName = $request->input('fileName');
+
+        $feed->merchantId = $request->input('merchantId');
 
         $user = User::where('_id', Auth::id())->first();
         $company = Company::where('_id', $user->company_id)->first();

@@ -31,7 +31,6 @@ Route::get('/refreshData/{id}', [App\Http\Controllers\FeedController::class, 're
 Route::post('/deleteFeed/{id}', [App\Http\Controllers\FeedController::class, 'delete']);
 
 Route::get('/settings', [App\Http\Controllers\UserController::class, 'showSettings'])->name('settings');
-Route::post('/uploadConfigFile', [App\Http\Controllers\UserController::class, 'uploadConfigFile']);
 
 Route::post('/sendToGoogleMerchant', [App\Http\Middleware\GoogleMerchantFeed::class, 'sendToGoogleMerchant']);
 

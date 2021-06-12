@@ -5,22 +5,8 @@
                 <div class="col-md-8">
                     <div class="card">
                         <div class="card-body">
-                            <form>
-                                <h3>{{ user.first_name }} {{ user.last_name }}</h3>
-                                <h3>{{ user.email }}</h3>
-                                <div class="form-group">
-                                    <div class="custom-file">
-                                        <input type="file" id="file" ref="file" class="custom-file-input" v-on:change="handleFileUpload()">
-                                        <label class="custom-file-label" for="file" v-if="user.configFileName">{{ user.configFileName}}</label>
-                                        <label class="custom-file-label" for="file" v-else>Upload JSON configuration file</label>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" v-if="user.merchantId" v-model="merchantId">
-                                    <input type="text" class="form-control" v-else v-model="merchantId" placeholder="Merchant ID">
-                                </div>
-                                <a href="#" class="btn btn-primary mt-2" @click="saveChanges">Save</a>
-                            </form>
+                            <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+                            <h3>{{ user.email }}</h3>
                         </div>
                     </div>
                 </div>

@@ -12,7 +12,9 @@ class Feed extends Model
     protected $fillable = [
         'name',
         'link',
-        'company_id'
+        'company_id',
+        'config',
+        'merchantId',
     ];
     /**
      * @var string
@@ -36,5 +38,17 @@ class Feed extends Model
      * @var string
      */
     private $company_id;
+
+    private $config;
+
+    /**
+     * @var string
+     */
+    private $configFileName;
+
+    /**
+     * @var integer
+     */
+    private $merchantID;
 
 }
