@@ -55,20 +55,25 @@ class GoogleMerchantFeed
             $product->setTargetCountry("RO");
             $product->setContentLanguage('ro');
 
+            $price = new \Google_Service_ShoppingContent_Price();
             foreach ($feedProduct as $field => $value)
             {
                 if(strpos($field, 'price') !== false)
                 {
-                    $price = new \Google_Service_ShoppingContent_Price();
                     $price->setValue(trim($value));
-                    $price->setCurrency('RON');
-
-                    $product->setPrice($price);
                     continue;
                 }
+
+                if(strpos($field, 'currency') !== false) {
+                    $price->setCurrency($value);
+                    continue;
+                }
+
                 $googleMethodName = "set".$this->dashesToCamelCase($field, true);
                 $product->{$googleMethodName}($value);
             }
+
+            $product->setPrice($price);
 
             $response = $merchant->products->insert($feed->merchantId, $product);
         }
