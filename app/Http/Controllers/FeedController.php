@@ -144,8 +144,8 @@ class FeedController extends Controller
     {
         $updatedFeed = Feed::where('_id', $id)->first();
 
-        $replace = $request->input('replace');
-        $with = $request->input('with');
+        $replace = urldecode($request->input('replace'));
+        $with = urldecode($request->input('with'));
         $columnName = $request->input('columnName');
 
         $oldColumnName = $request->input('oldName');
@@ -160,7 +160,12 @@ class FeedController extends Controller
             $newArray = $product;
             foreach($newArray as $key => &$value) {
                 if($key == $columnName) {
-                    $value = str_replace($replace, $with, $value);
+                    if($replace == '' and $value == '') {
+                        $value = $with;
+                    }
+                    else {
+                        $value = str_replace($replace, $with, $value);
+                    }
                 }
             }
 

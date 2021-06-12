@@ -50,8 +50,8 @@ export default {
             newColumnName: null,
             oldColumnName: null,
             visible: null,
-            replaceString: null,
-            replaceWith: null,
+            replaceString: '',
+            replaceWith: '',
         }
     },
     watch: {
@@ -63,16 +63,19 @@ export default {
     methods: {
         updateFeed() {
             const self = this
+            console.log("abcd"+this.replaceString+"abcd")
+            console.log("abcd"+this.replaceWith+"abcd")
             axios
                 .put("/editColumn/"+this.feedId, {
-                    replace: this.replaceString,
-                    with: this.replaceWith,
+                    replace: encodeURI(this.replaceString),
+                    with: encodeURI(this.replaceWith),
                     columnName: this.oldColumnName,
                     newName: this.newColumnName,
                     oldName: this.oldColumnName
-                })
+                }, )
                 .then(function (response){
                     self.$emit('update-columns')
+                    console.log(response.data)
                 })
                 .catch(function (error){
                     console.log(error)
