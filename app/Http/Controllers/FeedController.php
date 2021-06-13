@@ -50,8 +50,6 @@ class FeedController extends Controller
     public function create(Request $request)
     {
         $xml = file_get_contents($request->input('url'));
-        //TODO: check if url exists and is xml
-        // ...
         $xml_data = new ParserGoogleFeed($xml, LIBXML_NOCDATA);
 
         $feed = new Feed();
@@ -136,7 +134,6 @@ class FeedController extends Controller
         }
 
         $updatedFeed->save();
-        return json_encode($updatedFeed);
     }
 
     /**
@@ -158,7 +155,11 @@ class FeedController extends Controller
         }
 
         $originalFieldsTempArray = $updatedFeed->fields;
-        unset($originalFieldsTempArray[$deletedColumn]);
+        foreach($originalFieldsTempArray as $key => $value) {
+            if($value == $deletedColumn) {
+                unset($originalFieldsTempArray[$key]);
+            }
+        }
 
         $updatedFeed->products = $tempArray;
         $updatedFeed->fields = $originalFieldsTempArray;
