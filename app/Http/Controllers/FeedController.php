@@ -27,11 +27,15 @@ class FeedController extends Controller
     public function getFeed($id)
     {
         $feed = DB::collection('feeds')->where('_id', $id)->first();
+        if($feed == null) {
+            return [];
+        }
+
         $columns = [];
         foreach($feed['products'][0] as $property => $value) {
             $columns[] = $property;
         }
-        return [$columns, $feed['products'], $feed['name'], $feed['url'], $feed['config'], $feed['configFileName'], $feed['merchantId']];
+        return [$columns, $feed['products'], $feed['name'], $feed['url'], $feed['config'], $feed['configFileName'], $feed['merchantID']];
     }
 
     public function getUserFeeds()
@@ -62,7 +66,7 @@ class FeedController extends Controller
         $feed->config = $json_content;
         $feed->configFileName = $request->input('fileName');
 
-        $feed->merchantId = $request->input('merchantId');
+        $feed->merchantID = $request->input('merchantId');
 
         $user = User::where('_id', Auth::id())->first();
         $company = Company::where('_id', $user->company_id)->first();
@@ -256,7 +260,6 @@ class FeedController extends Controller
         }
         $feed->products = $productsWithEditedFields;
         $feed->save();
-        return json_encode($productsWithEditedFields);
     }
 
     /**

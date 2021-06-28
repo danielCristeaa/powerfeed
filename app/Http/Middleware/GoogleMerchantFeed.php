@@ -13,9 +13,8 @@ use Google\Client;
 
 class GoogleMerchantFeed
 {
-    private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
+    private function underscoreToCamelCase($string, $capitalizeFirstCharacter = false)
     {
-
         $str = str_replace('_', '', ucwords($string, '_'));
 
         if (!$capitalizeFirstCharacter) {
@@ -69,14 +68,13 @@ class GoogleMerchantFeed
                     continue;
                 }
 
-                $googleMethodName = "set".$this->dashesToCamelCase($field, true);
+                $googleMethodName = "set".$this->underscoreToCamelCase($field, true);
                 $product->{$googleMethodName}($value);
             }
 
             $product->setPrice($price);
 
-            $response = $merchant->products->insert($feed->merchantId, $product);
+            $merchant->products->insert($feed->merchantId, $product);
         }
-        return;
     }
 }

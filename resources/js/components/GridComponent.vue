@@ -49,7 +49,11 @@ export default {
             axios
                 .get("/feed/" + this.feedId)
                 .then(response => {
-
+                    if(response.data.length == 0) {
+                        this.columns = []
+                        this.rows = []
+                        return
+                    }
                     response.data[0].forEach(function(element) {
                         newColumns.push({ prop: element,
                             name: element,

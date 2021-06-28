@@ -2644,8 +2644,13 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       axios.get("/getUserFeeds").then(function (response) {
-        _this.feeds = response.data;
-        _this.feedId = _this.feeds[0]['_id'];
+        if (response.data.length > 0) {
+          _this.feeds = response.data;
+          _this.feedId = _this.feeds[0]['_id'];
+        } else {
+          _this.feeds = null;
+          _this.feedId = null;
+        }
       })["catch"](function (error) {
         return console.log(error);
       });
@@ -2729,10 +2734,18 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     updateColumns: function updateColumns() {
+      var _this = this;
+
       var self = this;
       var newColumns = [];
       var newRows = [];
       axios.get("/feed/" + this.feedId).then(function (response) {
+        if (response.data.length == 0) {
+          _this.columns = [];
+          _this.rows = [];
+          return;
+        }
+
         response.data[0].forEach(function (element) {
           newColumns.push({
             prop: element,
@@ -2791,10 +2804,10 @@ __webpack_require__.r(__webpack_exports__);
       this.updateColumns();
     },
     refreshDataCounter: function refreshDataCounter() {
-      var _this = this;
+      var _this2 = this;
 
       axios.get("/refreshData/" + this.feedId).then(function (response) {
-        _this.updateColumns();
+        _this2.updateColumns();
       })["catch"](function (error) {
         return console.log(error);
       });
