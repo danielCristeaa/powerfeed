@@ -30,6 +30,8 @@ Vue.component('add-feed-component', require('./components/AddFeedModalComponent.
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
+import Notifications from 'vue-notification'
+Vue.use(Notifications)
 
 const app = new Vue({
     el: '#app',

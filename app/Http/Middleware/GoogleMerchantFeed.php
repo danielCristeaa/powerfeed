@@ -42,7 +42,7 @@ class GoogleMerchantFeed
             $client->setScopes("https://www.googleapis.com/auth/content");
             $client->setAuthConfig($jsonKey);
         } catch (Exception $e) {
-            return $e->getMessage();
+            return response()->json(['error' => "Error when authenticating to Google merchant. Check the JSON config file"]);
         }
 
         $merchant = new \Google_Service_ShoppingContent($client);
@@ -57,24 +57,34 @@ class GoogleMerchantFeed
             $price = new \Google_Service_ShoppingContent_Price();
             foreach ($feedProduct as $field => $value)
             {
-                if(strpos($field, 'price') !== false)
-                {
-                    $price->setValue(trim($value));
-                    continue;
-                }
+                try {
+                    if(strpos($field, 'price') !== false)
+                    {
+                        $price->setValue(trim($value));
+                        continue;
+                    }
 
-                if(strpos($field, 'currency') !== false) {
-                    $price->setCurrency($value);
-                    continue;
-                }
+                    if(strpos($field, 'currency') !== false) {
+                        $price->setCurrency($value);
+                        continue;
+                    }
 
-                $googleMethodName = "set".$this->underscoreToCamelCase($field, true);
-                $product->{$googleMethodName}($value);
+                    $googleMethodName = "set".$this->underscoreToCamelCase($field, true);
+                    $product->{$googleMethodName}($value);
+                } catch(\Throwable $e) {
+                    return response()->json(['error' => "Invalid field: $field"]);
+                }
+            }
+            try {
+                $product->setPrice($price);
+
+                $merchant->products->insert($feed->merchantID, $product);
+            } catch( \Exception $e) {
+                $message = json_decode($e->getMessage())->error->message;
+                return response()->json(['error' => $message]);
             }
 
-            $product->setPrice($price);
-
-            $merchant->products->insert($feed->merchantId, $product);
         }
+        return response()->json(['success' => "Successfully published feed!"]);
     }
 }

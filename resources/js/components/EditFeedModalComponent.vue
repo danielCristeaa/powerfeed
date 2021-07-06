@@ -109,10 +109,24 @@ export default {
                 )
                 .then(function (response){
                     if("error" in response.data){
-                        console.log(response.data)
+                        self.$notify({
+                            title: 'Error',
+                            text: response.data['error'],
+                            type: 'error',
+                            duration: 3000,
+                        })
                     }
-                    else if(self.addColumns > 0) {
-                        self.$emit('new-columns-added')
+                    else {
+                        self.$notify({
+                            title: 'Success',
+                            text: response.data['success'],
+                            type: 'success',
+                            duration: 3000,
+                        })
+                        if(self.addColumns > 0)
+                            self.$emit('new-columns-added')
+
+                        self.resetAddColumnsDropdown()
                     }
                 })
                 .catch(function (error){
@@ -137,6 +151,9 @@ export default {
             this.file = this.$refs.file.files[0];
             document.querySelector(".custom-file-label").innerHTML = this.file.name
         },
+        resetAddColumnsDropdown(){
+            this.addColumns = 0
+        }
     }
 }
 </script>

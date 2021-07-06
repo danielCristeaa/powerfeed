@@ -53,15 +53,39 @@ class FeedController extends Controller
      */
     public function create(Request $request)
     {
-        $xml = file_get_contents($request->input('url'));
-        $xml_data = new ParserGoogleFeed($xml, LIBXML_NOCDATA);
+        set_time_limit(300);
+
+        if($request->missing('name')) {
+            return response()->json(['error' => "Missing name!"]);
+        }
+        if($request->missing('url')) {
+            return response()->json(['error' => "Missing URL"]);
+        }
+
+        try {
+            $file = $request->file('file');
+            $content = file_get_contents($file->getRealPath());
+        }
+        catch(\Throwable $e) {
+            return response()->json(['error' => "Missing JSON config file!"]);
+        }
+
+        if($request->missing('merchantId')) {
+            return response()->json(['error' => "Missing merchantID"]);
+        }
+
+        try {
+            $xml = file_get_contents($request->input('url'));
+            $xml_data = new ParserGoogleFeed($xml, LIBXML_NOCDATA);
+        }
+        catch (\Exception $e) {
+            return response()->json(['error' => "Invalid URL!"]);
+        }
 
         $feed = new Feed();
         $feed->name = $request->input('name');
         $feed->url = $request->input('url');
 
-        $file = $request->file('file');
-        $content = file_get_contents($file->getRealPath());
         $json_content = json_decode($content);
         $feed->config = $json_content;
         $feed->configFileName = $request->input('fileName');
@@ -86,7 +110,8 @@ class FeedController extends Controller
         $feed->fields = $originalFieldsTempArray;
         $feed->products = $temp_array;
         $feed->save();
-        return redirect()->route('feeds');
+
+        return response()->json(['success' => "Successfully added a feed!"]);
     }
 
 
@@ -103,7 +128,7 @@ class FeedController extends Controller
 
         $updatedFeed->name = $request->input('name');
         $updatedFeed->url = $request->input('url');
-        $updatedFeed->merchantId = $request->input('merchantId');
+        $updatedFeed->merchantID = $request->input('merchantId');
 
         $file = $request->file('file');
         if($file) {
@@ -138,6 +163,7 @@ class FeedController extends Controller
         }
 
         $updatedFeed->save();
+        return response()->json(['success' => "Successfully edited the feed!"]);
     }
 
     /**
@@ -230,8 +256,13 @@ class FeedController extends Controller
     public function refreshFeedData($id)
     {
         $feed = Feed::where('_id', $id)->first();
+        try {
+            $xml = file_get_contents($feed->url);
+        }
+        catch (\Exception $e) {
+            return response()->json(['error' => "URL no longer exists!"]);
+        }
 
-        $xml = file_get_contents($feed->url);
         $xml_data = new ParserGoogleFeed($xml, LIBXML_NOCDATA);
 
         $tempArray = [];
@@ -260,6 +291,8 @@ class FeedController extends Controller
         }
         $feed->products = $productsWithEditedFields;
         $feed->save();
+
+        return response()->json(['success' => "Successfully refreshed data!"]);
     }
 
     /**

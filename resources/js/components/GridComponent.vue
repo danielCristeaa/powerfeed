@@ -112,10 +112,27 @@ export default {
             this.updateColumns()
         },
         refreshDataCounter: function() {
+            const self = this
             axios
                 .get("/refreshData/" + this.feedId)
                 .then(response => {
-                    this.updateColumns()
+                    if("error" in response.data) {
+                        self.$notify({
+                            title: 'Error',
+                            text: response.data['error'],
+                            type: 'error',
+                            duration: 3000,
+                        })
+                    }
+                    else {
+                        self.$notify({
+                            title: 'Success',
+                            text: response.data['success'],
+                            type: 'success',
+                            duration: 3000,
+                        })
+                        this.updateColumns()
+                    }
                 })
                 .catch(error => console.log(error))
         },

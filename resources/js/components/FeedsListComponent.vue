@@ -16,6 +16,8 @@
         <grid :feedId="returnFeedId" :refreshDataCounter="returnRefreshData" :queryDbDataCounter="returnQueryDbDataCounter" />
         <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit" @deleted-feed="getUserFeeds" @new-columns-added="newColumnsAdded"/>
         <add-feed-component @new-feed="getUserFeeds"/>
+        <notifications position="bottom right"/>
+        <notifications group="processing" position="bottom right"/>
     </div>
 </template>
 
@@ -75,13 +77,29 @@ export default {
             document.getElementById(this.feedId).getElementsByTagName('span')[0].innerHTML = newName
         },
         publish() {
+            const self = this
             axios
                 .post("/sendToGoogleMerchant", {
                     feedId: this.feedId,
 
                 })
                 .then(response => {
-                    console.log(response.data)
+                    if("error" in response.data) {
+                        self.$notify({
+                            title: 'Error',
+                            text: response.data['error'],
+                            type: 'error',
+                            duration: 3000,
+                        })
+                    }
+                    else {
+                        self.$notify({
+                            title: 'Success',
+                            text: response.data['success'],
+                            type: 'success',
+                            duration: 3000,
+                        })
+                    }
                 })
                 .catch(error => console.log(error))
         },
@@ -95,11 +113,14 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .firstFeed {
     background-color: #dae0e5 !important;
 }
 .fa-sync, .fa-paper-plane {
     margin-right: 6px;
+}
+.vue-notification {
+    font-size: 16px;
 }
 </style>

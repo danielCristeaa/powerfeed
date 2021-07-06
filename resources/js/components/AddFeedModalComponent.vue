@@ -51,16 +51,56 @@ export default {
     methods:{
         handleFileUpload(){
             this.file = this.$refs.file.files[0];
-            document.querySelector(".custom-file-label").innerHTML = this.file.name
+            if(this.file) {
+                document.querySelector(".custom-file-label").innerHTML = this.file.name
+            }
+        },
+        resetFormData(){
+            this.name = null
+            this.url = null
+            this.file = ''
+            this.merchantId = null
+            this.$refs.file.value = "";
         },
         sendData() {
             const self = this
+            let unfilledInput = null
+            if(!this.merchantId)
+                unfilledInput = 'merchantID'
+            if(!this.file)
+                unfilledInput = 'JSON config file'
+            if(!this.url)
+                unfilledInput = 'URL'
+            if(!this.name)
+                unfilledInput = 'name'
+            if(unfilledInput){
+                self.$notify({
+                    title: 'Error',
+                    text: `Missing ${unfilledInput}!`,
+                    type: 'error',
+                    duration: 3000,
+                })
+                return
+            }
+
             let formData = new FormData()
             formData.append('name', this.name)
             formData.append('url', this.url)
+
             formData.append('fileName', this.file.name)
             formData.append('file', this.file)
+
+
             formData.append('merchantId', this.merchantId)
+
+            this.$notify({
+                group: 'processing',
+                title: 'Processing',
+                text: 'Your new feed is being processed. This may take some time.',
+                type: 'warn',
+                duration: -1,
+            })
+
             axios
                 .post("/addFeed", formData,
                     {
@@ -69,7 +109,30 @@ export default {
                         }
                     })
                 .then(function (response){
-                    self.$emit('new-feed')
+                    if("error" in response.data){
+                        self.$notify({
+                            title: 'Error',
+                            text: response.data['error'],
+                            type: 'error',
+                            duration: 3000,
+                        })
+                    }
+                    else {
+                        self.$notify({
+                            title: 'Success',
+                            text: response.data['success'],
+                            type: 'success',
+                            duration: 3000,
+                        })
+                        self.resetFormData()
+                        self.$emit('new-feed')
+                    }
+
+                    self.$notify({
+                        group: 'processing',
+                        clean: true
+                    })
+
                 })
                 .catch(function (error){
                     console.log(error)
