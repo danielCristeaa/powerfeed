@@ -62,10 +62,15 @@ export default {
     },
     data() {
       return {
+          oldName: null,
           newName: null,
+          oldURL: null,
           newUrl: null,
+          oldConfig: null,
           config: null,
+          oldConfigFileName: null,
           configFileName: null,
+          oldMerchantId: null,
           merchantId: null,
           addColumns: 0
       }
@@ -76,17 +81,43 @@ export default {
             axios
                 .get("/feed/"+this.feedId)
                 .then(response => {
-                    this.newName = response.data[2]
-                    this.newUrl = response.data[3]
-                    this.config = response.data[4]
-                    this.configFileName = response.data[5]
-                    this.merchantId = response.data[6]
+                    this.newName = this.oldName = response.data[2]
+                    this.newUrl = this.oldURL = response.data[3]
+                    this.config = this.oldConfig = response.data[4]
+                    this.configFileName = this.oldConfigFileName = response.data[5]
+                    this.merchantId = this.oldMerchantId = response.data[6]
                 })
         }
     },
     methods: {
         sendData() {
             const self = this
+            let unfilledInput = null
+            if(!this.merchantId) {
+                unfilledInput = 'merchantID'
+                this.merchantId = this.oldMerchantId
+            }
+            if(!this.config) {
+                unfilledInput = 'JSON config file'
+                this.config = this.oldConfig
+            }
+            if(!this.newUrl) {
+                unfilledInput = 'URL'
+                this.newUrl = this.oldURL
+            }
+            if(!this.newName) {
+                unfilledInput = 'name'
+                this.newName = this.oldName
+            }
+            if(unfilledInput){
+                this.$notify({
+                    title: 'Error',
+                    text: `Missing ${unfilledInput}!`,
+                    type: 'error',
+                    duration: 3000,
+                })
+                return
+            }
             let formData = new FormData()
             formData.append('name', this.newName)
             formData.append('url', this.newUrl)

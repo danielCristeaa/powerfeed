@@ -2290,7 +2290,7 @@ __webpack_require__.r(__webpack_exports__);
       if (!this.name) unfilledInput = 'name';
 
       if (unfilledInput) {
-        self.$notify({
+        this.$notify({
           title: 'Error',
           text: "Missing ".concat(unfilledInput, "!"),
           type: 'error',
@@ -2529,10 +2529,15 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
+      oldName: null,
       newName: null,
+      oldURL: null,
       newUrl: null,
+      oldConfig: null,
       config: null,
+      oldConfigFileName: null,
       configFileName: null,
+      oldMerchantId: null,
       merchantId: null,
       addColumns: 0
     };
@@ -2543,17 +2548,49 @@ __webpack_require__.r(__webpack_exports__);
 
       this.feedId = id;
       axios.get("/feed/" + this.feedId).then(function (response) {
-        _this.newName = response.data[2];
-        _this.newUrl = response.data[3];
-        _this.config = response.data[4];
-        _this.configFileName = response.data[5];
-        _this.merchantId = response.data[6];
+        _this.newName = _this.oldName = response.data[2];
+        _this.newUrl = _this.oldURL = response.data[3];
+        _this.config = _this.oldConfig = response.data[4];
+        _this.configFileName = _this.oldConfigFileName = response.data[5];
+        _this.merchantId = _this.oldMerchantId = response.data[6];
       });
     }
   },
   methods: {
     sendData: function sendData() {
       var self = this;
+      var unfilledInput = null;
+
+      if (!this.merchantId) {
+        unfilledInput = 'merchantID';
+        this.merchantId = this.oldMerchantId;
+      }
+
+      if (!this.config) {
+        unfilledInput = 'JSON config file';
+        this.config = this.oldConfig;
+      }
+
+      if (!this.newUrl) {
+        unfilledInput = 'URL';
+        this.newUrl = this.oldURL;
+      }
+
+      if (!this.newName) {
+        unfilledInput = 'name';
+        this.newName = this.oldName;
+      }
+
+      if (unfilledInput) {
+        this.$notify({
+          title: 'Error',
+          text: "Missing ".concat(unfilledInput, "!"),
+          type: 'error',
+          duration: 3000
+        });
+        return;
+      }
+
       var formData = new FormData();
       formData.append('name', this.newName);
       formData.append('url', this.newUrl);

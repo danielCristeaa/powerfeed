@@ -74,7 +74,7 @@ export default {
             if(!this.name)
                 unfilledInput = 'name'
             if(unfilledInput){
-                self.$notify({
+                this.$notify({
                     title: 'Error',
                     text: `Missing ${unfilledInput}!`,
                     type: 'error',
