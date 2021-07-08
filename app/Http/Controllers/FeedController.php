@@ -285,7 +285,16 @@ class FeedController extends Controller
         foreach($feed->fields as $field => $value) {
             foreach($productsWithEditedFields as &$product) {
                 if(array_key_exists($value, $product) == false) {
-                    $product[$value] = "";
+                    foreach($feed->products as $feedProduct) {
+                        if($feedProduct['id'] == $product['id']){
+                            if(array_key_exists($value, $feedProduct)) {
+                                $product[$value] = $feedProduct[$value];
+                            }
+                            else {
+                                $product[$value] = "";
+                            }
+                        }
+                    }
                 }
             }
         }
