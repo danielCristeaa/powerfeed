@@ -284,7 +284,7 @@ class FeedController extends Controller
 
         foreach($feed->fields as $field => $value) {
             foreach($productsWithEditedFields as &$product) {
-                if(array_key_exists($field, $product) == false) {
+                if(array_key_exists($value, $product) == false) {
                     $product[$value] = "";
                 }
             }
@@ -299,7 +299,6 @@ class FeedController extends Controller
      * Remove the specified resource from storage.
      *
      * @param integer $id
-     * @return \Illuminate\Http\Response
      */
     public function delete($id)
     {
@@ -308,6 +307,6 @@ class FeedController extends Controller
             return;
         }
 
-        Feed::where('_id', $id)->delete();
+        return Feed::where('_id', $id)->delete();
     }
 }
