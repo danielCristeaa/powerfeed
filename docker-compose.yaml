@@ -4,22 +4,49 @@ services:
     build:
       context: .
       dockerfile: .docker/Dockerfile
-    image: 'laravelapp'
-    ports:
-      - 8080:80
+    container_name: app
+    image: digitalocean.com/php
+    working_dir: /var/www
     volumes:
-      - ./:/var/www/html
+      - ./:/var/www
+      - ./.docker/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - app-network
+  webserver:
+    image: nginx:alpine
+    container_name: webserver
+    restart: always
+    tty: true
+    ports:
+      - "8080:80"
+      - "443"
+    volumes:
+      - ./:/var/www
+      - ./.docker/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - app-network
   mongo:
     image: mongo
     restart: always
+    container_name: mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
+    networks:
+      - app-network
   mongo-express:
     image: mongo-express
+    container_name: mongoexpress
     restart: always
     ports:
       - 8081:8081
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: root
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
