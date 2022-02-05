@@ -135,3 +135,9 @@ fabric.properties
 .idea/codestream.xml
 
 # End of https://www.toptal.com/developers/gitignore/api/laravel,phpstorm
+
+/public/css
+/public/js
+/public/js/*.js
+/public/build
+/public/mix-manifest.json
