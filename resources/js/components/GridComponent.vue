@@ -96,7 +96,7 @@ export default {
                     response.data[1].forEach(function(array) {
                         let bufferObject = {}
                         for(let i in array) {
-                            bufferObject.[i] = array[i]
+                            bufferObject[i] = array[i]
                         }
                         newRows.push(bufferObject);
                     })
