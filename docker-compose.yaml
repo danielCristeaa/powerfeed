@@ -12,6 +12,8 @@ services:
       - ./.docker/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       - app-network
+    ports:
+      - "3000:3000"
   webserver:
     image: nginx:alpine
     container_name: webserver
