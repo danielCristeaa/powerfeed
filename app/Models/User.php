@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Jenssegers\Mongodb\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 
 class User extends Authenticatable
 {
@@ -45,4 +46,17 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public static function getLoggedInUser() {
+        $user = User::where('_id', Auth::id())->first();
+
+        return $user;
+    }
+
+    public static function getCompanyUsers() {
+        $user = User::where('_id', Auth::id())->first();
+        $company_users = User::where('company_id', $user->company_id)->get();
+
+        return $company_users;
+    }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Services\UserService;
 
 class UserController extends Controller
 {
@@ -15,25 +15,21 @@ class UserController extends Controller
      */
     public function showSettings()
     {
-        $userId = Auth::id();
-        $user = User::where('_id', $userId)->first()->toJson();
-
-        $user = User::where('_id', Auth::id())->first();
-        $company_users = User::where('company_id', $user->company_id)->get()->toJson();
+        $user = User::getLoggedInUser()->toJson();
+        $company_users = User::getCompanyUsers()->toJson();
         return view('settings', ['user' => $user, 'company_users' => $company_users]);
     }
 
     public function delete(Request $request)
     {
-        $userId = Auth::id();
-        if(!$userId) {
-            return;
+        $userService = new UserService();
+        $response = $userService->deleteUserFromACompany($request->input('userId'));
+
+        if($response) {
+            return response()->json(['status' => 200, 'message' => 'User deleted successfully!', 'data' => null]);
         }
 
-        $user = User::where('_id', $userId)->first();
-        if($user->is_admin) {
-            User::where('_id', $request->input('userId'))->delete();
-        }
 
+        return response()->json(['status' => 200, 'message' => 'Error when deleting the user!', 'data' => null]);
     }
 }
