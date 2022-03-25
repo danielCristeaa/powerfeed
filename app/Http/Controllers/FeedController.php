@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
 use App\Models\Feed;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use silici0\GoogleParserFeed\ParserGoogleFeed;
+use App\Services\FeedService;
+use Exception;
 
 class FeedController extends Controller
 {
@@ -18,32 +16,30 @@ class FeedController extends Controller
      */
     public function index()
     {
-        $user = User::where('_id', Auth::id())->first();
-        $feeds = Feed::select('_id', 'name')->where('company_id', $user->company_id)->get()->toArray();
-
-        return view('home', ['feeds' => $feeds]);
+        return view('home');
     }
 
+    // Get feed data as an array
     public function getFeed($id)
     {
-        $feed = DB::collection('feeds')->where('_id', $id)->first();
-        if($feed == null) {
-            return [];
+        $feedService = new FeedService();
+        $feed = $feedService->getFeed($id);
+        if(empty($feed)) {
+            return response()->json(['success' => false, 'message' => 'Error when getting the feed!']);
         }
 
-        $columns = [];
-        foreach($feed['products'][0] as $property => $value) {
-            $columns[] = $property;
-        }
-        return [$columns, $feed['products'], $feed['name'], $feed['url'], $feed['config'], $feed['configFileName'], $feed['merchantID']];
+        return response()->json(['success' => true, 'message' => '', 'data' => $feed]);
     }
 
     public function getUserFeeds()
     {
-        $user = User::where('_id', Auth::id())->first();
-        $feeds = Feed::select('_id', 'name')->where('company_id', $user->company_id)->get()->toArray();
+        $feedService = new FeedService();
 
-        return $feeds;
+        $feeds = $feedService->getFeeds()->toArray();
+        if(empty($feeds)) {
+            return response()->json(['success' => false, 'message' => 'Error when getting the feeds!']);
+        }
+        return response()->json(['success' => true, 'message' => '', 'data' => $feeds]);
     }
 
     /**
@@ -56,10 +52,10 @@ class FeedController extends Controller
         set_time_limit(300);
 
         if($request->missing('name')) {
-            return response()->json(['error' => "Missing name!"]);
+            return response()->json(['success' => false, 'message' => "Missing name!"]);
         }
         if($request->missing('url')) {
-            return response()->json(['error' => "Missing URL"]);
+            return response()->json(['success' => false, 'message' => "Missing URL"]);
         }
 
         try {
@@ -67,11 +63,11 @@ class FeedController extends Controller
             $content = file_get_contents($file->getRealPath());
         }
         catch(\Throwable $e) {
-            return response()->json(['error' => "Missing JSON config file!"]);
+            return response()->json(['success' => false, 'message' => "Missing JSON config file!"]);
         }
 
         if($request->missing('merchantId')) {
-            return response()->json(['error' => "Missing merchantID"]);
+            return response()->json(['success' => false, 'message' => "Missing merchantID"]);
         }
 
         try {
@@ -79,39 +75,26 @@ class FeedController extends Controller
             $xml_data = new ParserGoogleFeed($xml, LIBXML_NOCDATA);
         }
         catch (\Exception $e) {
-            return response()->json(['error' => "Invalid URL!"]);
+            return response()->json(['success' => false, 'message' => "Invalid URL!"]);
         }
 
-        $feed = new Feed();
-        $feed->name = $request->input('name');
-        $feed->url = $request->input('url');
+        $feedService = new FeedService();
+        $data = [
+            'name' => $request->input('name'),
+            'url' => $request->input('url'),
+            'config' => json_decode($content),
+            'configFileName' => $request->input('fileName'),
+            'merchantID' => $request->input('merchantId'),
+            'xmlData' => $xml_data
+        ];
 
-        $json_content = json_decode($content);
-        $feed->config = $json_content;
-        $feed->configFileName = $request->input('fileName');
+        $response = $feedService->create($data);
 
-        $feed->merchantID = $request->input('merchantId');
-
-        $user = User::where('_id', Auth::id())->first();
-        $company = Company::where('_id', $user->company_id)->first();
-        $feed->company_id = $company->id;
-        $temp_array = [];
-
-        foreach($xml_data->toArray()['channel']->item as $item) {
-            $temp_array[] = $item;
+        if(!$response) {
+            return response()->json(['success' => false, 'message' => "Error when adding a feed!"]);
         }
 
-        $originalFields = array_keys(get_object_vars($temp_array[0]));
-        $originalFieldsTempArray = [];
-        foreach($originalFields as $value) {
-            $originalFieldsTempArray[$value] = $value;
-        }
-
-        $feed->fields = $originalFieldsTempArray;
-        $feed->products = $temp_array;
-        $feed->save();
-
-        return response()->json(['success' => "Successfully added a feed!"]);
+        return response()->json(['success' => true, 'message' => "Successfully added a feed!"]);
     }
 
 
@@ -120,50 +103,37 @@ class FeedController extends Controller
      *
      * @param Request $request
      * @param $id
-     * @return void
      */
     public function update(Request $request, $id)
     {
-        $updatedFeed = Feed::where('_id', $id)->first();
-
-        $updatedFeed->name = $request->input('name');
-        $updatedFeed->url = $request->input('url');
-        $updatedFeed->merchantID = $request->input('merchantId');
+        $feedService = new FeedService();
+        $data = [
+            'id' => $id,
+            'name' => $request->input('name'),
+            'url' => $request->input('url'),
+            'merchantID' => $request->input('merchantId'),
+            'addColumns' => $request->input('addColumns')
+        ];
 
         $file = $request->file('file');
         if($file) {
             $content = file_get_contents($file->getRealPath());
             $json_content = json_decode($content);
-            $updatedFeed->config = $json_content;
-            $updatedFeed->configFileName = $request->input('fileName');
+            $data['config'] = $json_content;
+            $data['configFileName'] = $request->input('fileName');
         }
 
-        if($request->input('addColumns') > 0){
-            $newFields = $updatedFeed->fields;
-            foreach ($newFields as $field => $value) {
-                if(strpos($field, 'new_column_') !== false) {
-                    return response()->json(['error' => "Error! You you have to rename the $field column before adding another one"]);
-                }
+        try {
+            $response = $feedService->update($data);
+            if($response) {
+                return response()->json(['success' => true, 'message' => "Successfully edited the feed!"]);
             }
-
-            for($i = 0; $i<$request->input('addColumns'); $i++) {
-                $newFields["new_column_$i"] = "new_column_$i";
+            else {
+                return response()->json(['success' => false, 'message' => 'Error when updating the feed!']);
             }
-
-            $updatedFeed->fields = $newFields;
-
-            $newProducts = $updatedFeed->products;
-            foreach($newProducts as &$product) {
-                for($i = 0; $i<$request->input('addColumns'); $i++) {
-                    $product["new_column_$i"] = "";
-                }
-            }
-
-            $updatedFeed->products = $newProducts;
+        } catch(Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
-
-        $updatedFeed->save();
-        return response()->json(['success' => "Successfully edited the feed!"]);
     }
 
     /**
@@ -176,26 +146,15 @@ class FeedController extends Controller
     {
         $updatedFeed = Feed::where('_id', $id)->first();
         $deletedColumn = $request->input('column');
+        $feedService = new FeedService();
+        $response = $feedService->deleteColumn($deletedColumn, $id);
 
-        $tempArray = [];
-        foreach($updatedFeed->products as $product) {
-            $newArray = $product;
-            unset($newArray[$deletedColumn]);
-            $tempArray[] = $newArray;
+        if($response) {
+            return response()->json(['success' => true, 'message' => "Successfully deleted the column!"]);
         }
-
-        $originalFieldsTempArray = $updatedFeed->fields;
-        foreach($originalFieldsTempArray as $key => $value) {
-            if($value == $deletedColumn) {
-                unset($originalFieldsTempArray[$key]);
-            }
+        else {
+            return response()->json(['success' => true, 'message' => "Error when deleting the column!"]);
         }
-
-        $updatedFeed->products = $tempArray;
-        $updatedFeed->fields = $originalFieldsTempArray;
-        $updatedFeed->save();
-
-        return json_encode($updatedFeed->products);
     }
 
     /**
@@ -206,128 +165,61 @@ class FeedController extends Controller
      */
     public function editColumn(Request $request, $id)
     {
-        $updatedFeed = Feed::where('_id', $id)->first();
+        $data = [
+            'replace' => urldecode($request->input('replace')),
+            'with' => urldecode($request->input('with')),
+            'columnName' => $request->input('columnName'),
+            'newColumnName' => $request->input('newName'),
+        ];
 
-        $replace = urldecode($request->input('replace'));
-        $with = urldecode($request->input('with'));
-        $columnName = $request->input('columnName');
+        $feedService = new FeedService();
 
-        $oldColumnName = $request->input('oldName');
-        $newColumnName = $request->input('newName');
+        $response = $feedService->editColumn($data, $id);
 
-        $originalFieldsTempArray = $updatedFeed->fields;
-        $originalColumnName = array_search($oldColumnName, $originalFieldsTempArray);
-        if(strpos($originalColumnName, 'new_column_') !== false) {
-            $originalFieldsTempArray[$newColumnName] = $newColumnName;
-            unset($originalFieldsTempArray[$originalColumnName]);
+        if($response) {
+            return response()->json(['success' => true, 'message' => "Successfully edited the feed!"]);
         }
         else {
-            $originalFieldsTempArray[$originalColumnName] = $newColumnName;
+            return response()->json(['success' => false, 'message' => 'Error when editing the feed!']);
         }
-
-        $tempArray = [];
-        foreach($updatedFeed->products as $product) {
-            $newArray = $product;
-            foreach($newArray as $key => &$value) {
-                if($key == $columnName) {
-                    if($replace == '' and $value == '') {
-                        $value = $with;
-                    }
-                    else {
-                        $value = str_replace($replace, $with, $value);
-                    }
-                }
-            }
-
-            $arrayKeys = array_keys($newArray);
-            $oldKeyIndex = array_search($oldColumnName, $arrayKeys);
-            $arrayKeys[$oldKeyIndex] = $newColumnName;
-
-            $newArray = array_combine($arrayKeys, $newArray);
-            $tempArray[] = $newArray;
-        }
-
-        $updatedFeed->products = $tempArray;
-        $updatedFeed->fields = $originalFieldsTempArray;
-        $updatedFeed->save();
-        return json_encode($updatedFeed->products);
     }
 
     public function refreshFeedData($id)
     {
-        $feed = Feed::where('_id', $id)->first();
+        $feedService = new FeedService();
         try {
-            $xml = file_get_contents($feed->url);
-        }
-        catch (\Exception $e) {
-            return response()->json(['error' => "URL no longer exists!"]);
-        }
-
-        $xml_data = new ParserGoogleFeed($xml, LIBXML_NOCDATA);
-
-        $tempArray = [];
-        foreach($xml_data->toArray()['channel']->item as $item) {
-            $tempArray[] = $item;
-        }
-
-        $productsWithEditedFields = [];
-        foreach($tempArray as $item) {
-            $newArray = [];
-            foreach($item as $key => $value) {
-                if(!in_array($key, array_keys($feed->fields))) {
-                    continue;
-                }
-                $newArray[$feed->fields[$key]] = $value;
+            $response = $feedService->refreshData($id);
+            if($response) {
+                return response()->json(['success' => true, 'message' => "Successfully refreshed the feed!"]);
             }
-            $productsWithEditedFields[] = $newArray;
-        }
-
-        foreach($feed->fields as $field => $value) {
-            foreach($productsWithEditedFields as &$product) {
-                if(array_key_exists($value, $product) == false) {
-                    foreach($feed->products as $feedProduct) {
-                        if(array_key_exists('offer_id', $feedProduct)) {
-                            if($feedProduct['offer_id'] == $product['offer_id']){
-                                if(array_key_exists($value, $feedProduct)) {
-                                    $product[$value] = $feedProduct[$value];
-                                }
-                                else {
-                                    $product[$value] = "";
-                                }
-                            }
-                        }
-                        elseif(array_key_exists('id', $feedProduct)) {
-                            if($feedProduct['id'] == $product['id']){
-                                if(array_key_exists($value, $feedProduct)) {
-                                    $product[$value] = $feedProduct[$value];
-                                }
-                                else {
-                                    $product[$value] = "";
-                                }
-                            }
-                        }
-                    }
-                }
+            else {
+                return response()->json(['success' => false, 'message' => 'Error when refreshing the feed!']);
             }
+        } catch(Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
-        $feed->products = $productsWithEditedFields;
-        $feed->save();
 
         return response()->json(['success' => "Successfully refreshed data!"]);
     }
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param integer $id
      */
     public function delete($id)
     {
-        $userId = Auth::id();
-        if(!$userId) {
-            return;
-        }
+        $feedService = new FeedService();
 
-        return Feed::where('_id', $id)->delete();
+        try {
+            $response = $feedService->delete($id);
+
+            if($response) {
+                return response()->json(['success' => true, 'message' => "Successfully deleted the feed!"]);
+            }
+            else {
+                return response()->json(['success' => false, 'message' => 'Error when deleting the feed!']);
+            }
+        } catch(Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 }

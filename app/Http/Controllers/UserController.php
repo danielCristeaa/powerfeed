@@ -26,10 +26,10 @@ class UserController extends Controller
         $response = $userService->deleteUserFromACompany($request->input('userId'));
 
         if($response) {
-            return response()->json(['status' => 200, 'message' => 'User deleted successfully!', 'data' => null]);
+            return response()->json(['success' => true, 'message' => 'User deleted successfully!']);
         }
 
 
-        return response()->json(['status' => 200, 'message' => 'Error when deleting the user!', 'data' => null]);
+        return response()->json(['success' => false, 'message' => 'Error when deleting the user!']);
     }
 }

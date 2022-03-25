@@ -81,11 +81,11 @@ export default {
             axios
                 .get("/feed/"+this.feedId)
                 .then(response => {
-                    this.newName = this.oldName = response.data[2]
-                    this.newUrl = this.oldURL = response.data[3]
-                    this.config = this.oldConfig = response.data[4]
-                    this.configFileName = this.oldConfigFileName = response.data[5]
-                    this.merchantId = this.oldMerchantId = response.data[6]
+                    this.newName = this.oldName = response.data.data[2]
+                    this.newUrl = this.oldURL = response.data.data[3]
+                    this.config = this.oldConfig = response.data.data[4]
+                    this.configFileName = this.oldConfigFileName = response.data.data[5]
+                    this.merchantId = this.oldMerchantId = response.data.data[6]
                 })
         }
     },
@@ -138,11 +138,11 @@ export default {
                         }
                     }
                 )
-                .then(function (response){
-                    if("error" in response.data){
+                .then(response => {
+                    if(response.data.success == false){
                         self.$notify({
                             title: 'Error',
-                            text: response.data['error'],
+                            text: response.data.message,
                             type: 'error',
                             duration: 3000,
                         })
@@ -150,31 +150,46 @@ export default {
                     else {
                         self.$notify({
                             title: 'Success',
-                            text: response.data['success'],
+                            text: response.data.message,
                             type: 'success',
                             duration: 3000,
                         })
+                        this.$emit('updated-values', this.newName)
                         if(self.addColumns > 0)
                             self.$emit('new-columns-added')
 
                         self.resetAddColumnsDropdown()
                     }
                 })
-                .catch(function (error){
+                .catch(error => {
                     //display an alert with an error message
                     console.log(error)
                 })
-
-            this.$emit('updated-values', this.newName)
         },
         deleteFeed() {
             const self = this;
             axios
                 .post('/deleteFeed/'+this.feedId)
-                .then(function (response){
-                    self.$emit('deleted-feed')
+                .then(response => {
+                    if(response.data.success == false){
+                        self.$notify({
+                            title: 'Error',
+                            text: response.data.message,
+                            type: 'error',
+                            duration: 3000,
+                        })
+                    }
+                    else {
+                        self.$notify({
+                            title: 'Success',
+                            text: response.data.message,
+                            type: 'success',
+                            duration: 3000,
+                        })
+                        self.$emit('deleted-feed')
+                    }
                 })
-                .catch(function (error){
+                .catch(error => {
                     console.log(error.response.data)
                 })
         },

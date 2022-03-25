@@ -109,23 +109,23 @@ export default {
                         }
                     })
                 .then(function (response){
-                    if("error" in response.data){
-                        self.$notify({
-                            title: 'Error',
-                            text: response.data['error'],
-                            type: 'error',
-                            duration: 3000,
-                        })
-                    }
-                    else {
+                    if(response.data.success){
                         self.$notify({
                             title: 'Success',
-                            text: response.data['success'],
+                            text: response.data.message,
                             type: 'success',
                             duration: 3000,
                         })
                         self.resetFormData()
                         self.$emit('new-feed')
+                    }
+                    else {
+                        self.$notify({
+                            title: 'Error',
+                            text: response.data.message,
+                            type: 'error',
+                            duration: 3000,
+                        })
                     }
 
                     self.$notify({

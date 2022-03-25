@@ -49,12 +49,23 @@ export default {
             axios
                 .get("/feed/" + this.feedId)
                 .then(response => {
-                    if(response.data.length == 0) {
+                    if(response.data.success == false) {
+                        this.$notify({
+                            title: 'Error',
+                            text: response.data.data.message,
+                            type: 'error',
+                            duration: 3000,
+                        })
+
+                        return
+                    }
+
+                    if(response.data.data.length == 0) {
                         this.columns = []
                         this.rows = []
                         return
                     }
-                    response.data[0].forEach(function(element) {
+                    response.data.data[0].forEach(function(element) {
                         newColumns.push({ prop: element,
                             name: element,
                             size: 150,
@@ -93,7 +104,7 @@ export default {
                             },
                         })
                     })
-                    response.data[1].forEach(function(array) {
+                    response.data.data[1].forEach(function(array) {
                         let bufferObject = {}
                         for(let i in array) {
                             bufferObject[i] = array[i]

@@ -69,12 +69,27 @@ export default {
                     with: encodeURI(this.replaceWith),
                     columnName: this.oldColumnName,
                     newName: this.newColumnName,
-                    oldName: this.oldColumnName
                 }, )
-                .then(function (response){
-                    self.$emit('update-columns')
+                .then(response => {
+                    if(response.data.success) {
+                        self.$emit('update-columns')
+                        self.$notify({
+                            title: 'Success',
+                            text: response.data.message,
+                            type: 'success',
+                            duration: 3000,
+                        })
+                    }
+                    else {
+                        self.$notify({
+                            title: 'Error',
+                            text: response.data.message,
+                            type: 'error',
+                            duration: 3000,
+                        })
+                    }
                 })
-                .catch(function (error){
+                .catch(error => {
                     console.log(error.message)
                 })
 
@@ -91,10 +106,26 @@ export default {
             const self = this
             axios
                 .put("/deleteColumn/"+this.feedId, {column: this.oldColumnName})
-                .then(function (response){
-                    self.$emit('update-columns')
+                .then(response => {
+                    if(response.data.success) {
+                        self.$emit('update-columns')
+                        self.$notify({
+                            title: 'Success',
+                            text: response.data.message,
+                            type: 'success',
+                            duration: 3000,
+                        })
+                    }
+                    else {
+                        self.$notify({
+                            title: 'Error',
+                            text: response.data.message,
+                            type: 'error',
+                            duration: 3000,
+                        })
+                    }
                 })
-                .catch(function (error){
+                .catch(error => {
                     console.log(error)
                 })
             this.hideModal()

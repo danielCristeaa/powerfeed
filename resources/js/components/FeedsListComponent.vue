@@ -58,14 +58,24 @@ export default {
             axios
                 .get("/getUserFeeds")
                 .then(response => {
-                    if(response.data.length > 0) {
-                        this.feeds = response.data
-                        this.feedId = this.feeds[0]['_id']
+                    if(response.data.success) {
+                        if(response.data.data.length > 0) {
+                            this.feeds = response.data.data
+                            this.feedId = this.feeds[0]['_id']
+                        }
+                        else {
+                            this.feeds = null
+                            this.feedId = null
+                        }
+                    } else {
+                        this.$notify({
+                            title: 'Error',
+                            text: response.data.data.message,
+                            type: 'error',
+                            duration: 3000,
+                        })
                     }
-                    else {
-                        this.feeds = null
-                        this.feedId = null
-                    }
+
                 })
                 .catch(error => console.log(error))
         },
