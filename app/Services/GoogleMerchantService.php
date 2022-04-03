@@ -6,6 +6,9 @@ namespace App\Services;
 use App\Models\Feed;
 use Google\Exception;
 use Google\Client;
+use Google\Service\ShoppingContent;
+use Google\Service\ShoppingContent\Product;
+use Google\Service\ShoppingContent\Price;
 
 class GoogleMerchantService
 {
@@ -41,16 +44,16 @@ class GoogleMerchantService
             throw $e;
         }
 
-        $merchant = new \Google_Service_ShoppingContent($client);
+        $merchant = new ShoppingContent($client);
 
         foreach ($feed->products as $feedProduct)
         {
-            $product = new \Google_Service_ShoppingContent_Product();
+            $product = new Product();
             $product->setChannel('online');
             $product->setTargetCountry("RO");
             $product->setContentLanguage('ro');
 
-            $price = new \Google_Service_ShoppingContent_Price();
+            $price = new Price();
             foreach ($feedProduct as $field => $value)
             {
                 try {
