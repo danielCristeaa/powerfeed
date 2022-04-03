@@ -1,17 +1,13 @@
 <?php
 
 
-namespace App\Http\Middleware;
+namespace App\Services;
 
 use App\Models\Feed;
-use App\Models\User;
 use Google\Exception;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Google\Client;
 
-class GoogleMerchantFeed
+class GoogleMerchantService
 {
     private function underscoreToCamelCase($string, $capitalizeFirstCharacter = false)
     {
@@ -24,9 +20,9 @@ class GoogleMerchantFeed
         return $str;
     }
 
-    public function sendToGoogleMerchant(Request $request)
+    public function sendToGoogleMerchant($feedId)
     {
-        $feed = Feed::where('_id', $request->input('feedId'))->first();
+        $feed = Feed::where('_id', $feedId)->first();
 
         $jsonKey = [];
 
@@ -42,7 +38,7 @@ class GoogleMerchantFeed
             $client->setScopes("https://www.googleapis.com/auth/content");
             $client->setAuthConfig($jsonKey);
         } catch (Exception $e) {
-            return response()->json(['error' => "Error when authenticating to Google merchant. Check the JSON config file"]);
+            throw $e;
         }
 
         $merchant = new \Google_Service_ShoppingContent($client);
@@ -72,7 +68,7 @@ class GoogleMerchantFeed
                     $googleMethodName = "set".$this->underscoreToCamelCase($field, true);
                     $product->{$googleMethodName}($value);
                 } catch(\Throwable $e) {
-                    return response()->json(['error' => "Invalid field: $field"]);
+                    throw new Exception(json_encode(['error' => ['errors' => [['message' => "Invalid field: $field"]]]]));
                 }
             }
             try {
@@ -80,11 +76,9 @@ class GoogleMerchantFeed
 
                 $merchant->products->insert($feed->merchantID, $product);
             } catch( \Exception $e) {
-                $message = json_decode($e->getMessage())->error->message;
-                return response()->json(['error' => $message]);
+                throw new Exception($e->getMessage());
             }
 
         }
-        return response()->json(['success' => "Successfully published feed!"]);
     }
 }

@@ -32,7 +32,7 @@ Route::post('/deleteFeed/{id}', [App\Http\Controllers\FeedController::class, 'de
 
 Route::get('/settings', [App\Http\Controllers\UserController::class, 'showSettings'])->name('settings');
 
-Route::post('/sendToGoogleMerchant', [App\Http\Middleware\GoogleMerchantFeed::class, 'sendToGoogleMerchant']);
+Route::post('/sendToGoogleMerchant', [App\Http\Controllers\FeedController::class, 'sendToGoogleMerchant']);
 
 Route::get('/showAddUser', [App\Http\Controllers\Auth\AddUserToCompany::class, 'showAddUsers']);
 Route::post('/addUser', [App\Http\Controllers\Auth\AddUserToCompany::class, 'addUserToCompany']);

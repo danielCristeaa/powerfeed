@@ -6,6 +6,7 @@ use App\Models\Feed;
 use Illuminate\Http\Request;
 use silici0\GoogleParserFeed\ParserGoogleFeed;
 use App\Services\FeedService;
+use App\Services\GoogleMerchantService;
 use Exception;
 
 class FeedController extends Controller
@@ -198,8 +199,6 @@ class FeedController extends Controller
         } catch(Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
-
-        return response()->json(['success' => "Successfully refreshed data!"]);
     }
 
     /**
@@ -221,5 +220,19 @@ class FeedController extends Controller
         } catch(Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    public function sendToGoogleMerchant(Request $request)
+    {
+        $googleMerchantService = new GoogleMerchantService();
+        $feedId = $request->input('feedId');
+
+        try {
+            $googleMerchantService->sendToGoogleMerchant($feedId);
+        } catch(Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+
+        return response()->json(['success' => true, 'message' => "Successfully published feed!"]);
     }
 }

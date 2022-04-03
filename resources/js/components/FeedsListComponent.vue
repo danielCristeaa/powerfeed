@@ -91,24 +91,26 @@ export default {
             axios
                 .post("/sendToGoogleMerchant", {
                     feedId: this.feedId,
-
                 })
                 .then(response => {
-                    if("error" in response.data) {
+                    if(response.data.success) {
                         self.$notify({
-                            title: 'Error',
-                            text: response.data['error'],
-                            type: 'error',
+                            title: 'Success',
+                            text: response.data.message,
+                            type: 'success',
                             duration: 3000,
                         })
                     }
                     else {
-                        self.$notify({
-                            title: 'Success',
-                            text: response.data['success'],
-                            type: 'success',
-                            duration: 3000,
-                        })
+                        let errors = JSON.parse(response.data.message).error.errors
+                        for(let i = 0; i < errors.length; i++) {
+                            self.$notify({
+                                title: 'Error',
+                                text: errors[i].message,
+                                type: 'error',
+                                duration: 3000,
+                            })
+                        }
                     }
                 })
                 .catch(error => console.log(error))
