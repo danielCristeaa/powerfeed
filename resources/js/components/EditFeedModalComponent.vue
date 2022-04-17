@@ -1,55 +1,47 @@
 <template>
-    <div class="modal fade" id="editFeedModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Edit Feed</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div>
-                        <div class="form-group">
-                            <label class="col-form-label">Name</label>
-                            <input type="text" class="form-control" name="name" v-model="newName">
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">URL</label>
-                            <input type="text" class="form-control" name="url" v-model="newUrl">
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">JSON config file</label>
-                            <div class="custom-file">
-                                <input type="file" id="file" ref="file" class="custom-file-input" v-on:change="handleFileUpload">
-                                <label class="custom-file-label" for="file" v-if="configFileName">{{ configFileName}}</label>
-                                <label class="custom-file-label" for="file" v-else>Upload JSON configuration file</label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-form-label">Merchant ID</label>
-                            <input type="text" class="form-control" v-if="merchantId" v-model="merchantId">
-                            <input type="text" class="form-control" v-else v-model="merchantId" placeholder="Merchant ID">
-                        </div>
-                        <div class="form-group">
-                            <select class="custom-select" aria-label="Add columns" v-model="addColumns">
-                                <option selected value="0">Add columns at the end of the feed</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                            </select>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" @click="sendData()" data-dismiss="modal">Submit</button>
-                            <button type="button" class="btn btn-danger" @click="deleteFeed()" data-dismiss="modal">Delete feed</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <v-dialog width="500" v-model="dialog">
+        <template v-slot:activator="{ on, attrs }">
+            <v-btn icon v-bind="attrs" v-on="on"><i class="fas fa-edit fa-lg"></i></v-btn>
+        </template>
+        <v-card>
+            <v-card-title class="text-h5 grey lighten-2"> Edit feed </v-card-title>
+            <v-card-text>
+                <v-form>
+                    <v-row>
+                        <v-col cols="12" md="12">
+                            <v-text-field v-model="newName" label="Name"></v-text-field>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="12" md="12">
+                            <v-text-field v-model="newUrl" label="URL"></v-text-field>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="12" md="12">
+                            <v-file-input accept=".json" v-model="configFile" label="JSON configuration file"></v-file-input>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="12" md="12">
+                            <v-text-field v-model="merchantId" label="Merchant ID"></v-text-field>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="12" md="12">
+                            <v-select v-model="addColumns" label="Add columns" :items="[1, 2, 3, 4]"></v-select>
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="red" text @click="deleteFeed()">Delete feed</v-btn>
+                <v-btn color="secondary" text @click="dialog = false">Close</v-btn>
+                <v-btn color="primary" text @click="sendData()">Submit</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script>
@@ -62,32 +54,34 @@ export default {
     },
     data() {
       return {
+          dialog: null,
           oldName: null,
           newName: null,
           oldURL: null,
           newUrl: null,
           oldConfig: null,
           config: null,
-          oldConfigFileName: null,
-          configFileName: null,
+          oldConfigFile: null,
+          configFile: null,
           oldMerchantId: null,
           merchantId: null,
           addColumns: 0
       }
     },
     watch: {
-        feedId(id) {
-            this.feedId = id;
-            axios
-                .get("/feed/"+this.feedId)
-                .then(response => {
-                    this.newName = this.oldName = response.data.data[2]
-                    this.newUrl = this.oldURL = response.data.data[3]
-                    this.config = this.oldConfig = response.data.data[4]
-                    this.configFileName = this.oldConfigFileName = response.data.data[5]
-                    this.merchantId = this.oldMerchantId = response.data.data[6]
-                })
-        }
+        dialog(newVal) {
+            if(newVal == true) {
+                axios
+                    .get("/feed/"+this.feedId)
+                    .then(response => {
+                        this.newName = this.oldName = response.data.data[2]
+                        this.newUrl = this.oldURL = response.data.data[3]
+                        this.config = this.oldConfig = response.data.data[4]
+                        this.configFile = this.oldConfigFile = new File([this.config], response.data.data[5])
+                        this.merchantId = this.oldMerchantId = response.data.data[6]
+                    })
+            }
+        },
     },
     methods: {
         sendData() {
@@ -124,11 +118,12 @@ export default {
             formData.append('merchantId', this.merchantId)
             formData.append('addColumns', this.addColumns)
 
-            if(this.file) {
-                formData.append('fileName', this.file.name)
-                formData.append('file', this.file)
+            if(this.configFile) {
+                formData.append('fileName', this.configFile.name)
+                formData.append('file', this.configFile)
+                console.log(this.configFile)
+                console.log(this.configFile.name)
             }
-
             axios
                 .post("/editFeed/"+this.feedId,
                     formData,
@@ -154,7 +149,7 @@ export default {
                             type: 'success',
                             duration: 3000,
                         })
-                        this.$emit('updated-values', this.newName)
+                        this.$emit('updated-values', {feedId: this.feedId, newName: this.newName})
                         if(self.addColumns > 0)
                             self.$emit('new-columns-added')
 
@@ -165,6 +160,8 @@ export default {
                     //display an alert with an error message
                     console.log(error)
                 })
+
+                this.dialog = false
         },
         deleteFeed() {
             const self = this;
@@ -192,10 +189,8 @@ export default {
                 .catch(error => {
                     console.log(error.response.data)
                 })
-        },
-        handleFileUpload(){
-            this.file = this.$refs.file.files[0];
-            document.querySelector(".custom-file-label").innerHTML = this.file.name
+
+                this.dialog = false
         },
         resetAddColumnsDropdown(){
             this.addColumns = 0

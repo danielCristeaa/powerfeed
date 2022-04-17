@@ -1,40 +1,45 @@
 <template>
-    <div class="modal fade" id="addFeedModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add a feed</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="name" placeholder="Name" v-model="name">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control" name="url" placeholder="URL" v-model="url">
-                        </div>
-                        <div class="form-group">
-                            <div class="custom-file">
-                                <input type="file" id="file" ref="file" class="custom-file-input" v-on:change="handleFileUpload()">
-                                <label class="custom-file-label" for="file" v-if="file">{{ file.name }}</label>
-                                <label class="custom-file-label" for="file" v-else>Upload JSON configuration file</label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Merchant ID" v-model="merchantId">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary" @click="sendData()" data-dismiss="modal">Add</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <v-dialog width="500" v-model="dialog">
+        <template v-slot:activator="{ on, attrs }">
+            <v-btn class="mb-4" block depressed color="primary" v-bind="attrs" v-on="on"><i class="fas fa-plus fa-lg"></i><b>Add</b></v-btn>
+        </template>
+        <v-card>
+            <v-card-title class="text-h5 grey lighten-2"> Add a Google Merchant feed </v-card-title>
+
+            <v-card-text>
+                <v-form>
+                    <v-row>
+                        <v-col cols="12" md="12">
+                            <v-text-field v-model="name" label="Name"></v-text-field>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="12" md="12">
+                            <v-text-field v-model="url" label="URL"></v-text-field>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="12" md="12">
+                            <v-file-input accept=".json" v-model="file" label="Upload the JSON configuration file"></v-file-input>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="12" md="12">
+                            <v-text-field v-model="merchantId" label="Merchant ID"></v-text-field>
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </v-card-text>
+
+            <v-divider></v-divider>
+
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="secondary" text @click="dialog = false">Close</v-btn>
+                <v-btn color="primary" text @click="sendData()">Submit</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script>
@@ -42,25 +47,20 @@ export default {
     name: "AddFeedModalComponent",
     data() {
         return {
+            dialog: false,
             name: null,
             url: null,
-            file: '',
+            file: null,
             merchantId: null
         }
     },
     methods:{
-        handleFileUpload(){
-            this.file = this.$refs.file.files[0];
-            if(this.file) {
-                document.querySelector(".custom-file-label").innerHTML = this.file.name
-            }
-        },
         resetFormData(){
             this.name = null
             this.url = null
-            this.file = ''
+            this.file = null
             this.merchantId = null
-            this.$refs.file.value = "";
+            this.file = null;
         },
         sendData() {
             const self = this
@@ -100,6 +100,8 @@ export default {
                 type: 'warn',
                 duration: -1,
             })
+
+            this.dialog = false
 
             axios
                 .post("/addFeed", formData,

@@ -92,6 +92,11 @@ class FeedService
         $updatedFeed->url = $data['url'];
         $updatedFeed->merchantID = $data['merchantID'];
 
+        if($data['config']) {
+            $updatedFeed->config = $data['config'];
+            $updatedFeed->configFileName = $data['configFileName'];
+        }
+
         if($data['addColumns'] > 0){
             $newFields = $updatedFeed->fields;
             foreach ($newFields as $field => $value) {

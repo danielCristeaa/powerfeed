@@ -1,24 +1,27 @@
 <template>
-    <div class="d-flex" id="wrapper">
-        <div class="bg-light border-right" id="sidebar-wrapper">
-            <div class="sidebar-heading">Your feeds</div>
+    <v-app>
+        <div class="d-flex" id="wrapper">
+            <div class="bg-light border-right" id="sidebar-wrapper">
+                <div class="sidebar-heading">Your Google Feeds</div>
 
-            <ul class="list-group list-group-flush">
-                <a class="list-group-item list-group-item-action bg-light" data-toggle="modal" data-target="#addFeedModal"><i class="fas fa-plus fa-lg"></i> <b>Add</b></a>
-                <a href="#" class="list-group-item list-group-item-action bg-light" :class="{ 'firstFeed' : feedId == feed['_id']}" @click="loadFeed(feed['_id'])" :id="feed['_id']" v-for="(feed, index) in feeds">
-                    <span>{{ feed['name'] }}</span>
-                    <a style="float:right" data-toggle="modal" data-target="#editFeedModal"><i class="fas fa-edit fa-lg"></i></a>
-                    <a style="float:right" @click="refreshFeedData()"><i class="fas fa-lg fa-sync"></i></a>
-                    <a style="float:right" @click="publish()"><i class="fas fa-lg fa-solid fa-paper-plane"></i></a>
-                </a>
-            </ul>
+                <add-feed-component @new-feed="getUserFeeds"/>
+                <v-tabs vertical>
+                    <v-tab v-for="feed in feeds" :key="feed['_id']" :class="{ 'firstFeed' : feedId == feed['_id']}" @click="loadFeed(feed['_id'])" :id="feed['_id']">
+                        <span>{{ feed['name'] }}</span>
+                        <div class="ml-auto">
+                            <!-- <v-btn icon data-toggle="modal" data-target="#editFeedModal"><i class="fas fa-edit fa-lg"></i></v-btn> -->
+                            <edit-feed-modal-component :feedId="feed['_id']" @updated-values="updateValuesAfterEdit" @deleted-feed="getUserFeeds" @new-columns-added="newColumnsAdded"/>
+                            <v-btn icon @click="refreshFeedData()"><i class="fas fa-lg fa-sync"></i></v-btn>
+                            <v-btn icon @click="publish()"><i class="fas fa-lg fa-solid fa-paper-plane"></i></v-btn>
+                        </div>
+                    </v-tab>
+                </v-tabs>
+            </div>
+            <grid :feedId="returnFeedId" :refreshDataCounter="returnRefreshData" :queryDbDataCounter="returnQueryDbDataCounter" />
+            <notifications position="bottom right"/>
+            <notifications group="processing" position="bottom right"/>
         </div>
-        <grid :feedId="returnFeedId" :refreshDataCounter="returnRefreshData" :queryDbDataCounter="returnQueryDbDataCounter" />
-        <edit-feed-modal-component :feedId="returnFeedId" @updated-values="updateValuesAfterEdit" @deleted-feed="getUserFeeds" @new-columns-added="newColumnsAdded"/>
-        <add-feed-component @new-feed="getUserFeeds"/>
-        <notifications position="bottom right"/>
-        <notifications group="processing" position="bottom right"/>
-    </div>
+    </v-app>
 </template>
 
 <script>
@@ -83,8 +86,8 @@ export default {
             this.feedId = id;
             this.firstClick = true;
         },
-        updateValuesAfterEdit(newName) {
-            document.getElementById(this.feedId).getElementsByTagName('span')[0].innerHTML = newName
+        updateValuesAfterEdit(eventObject) {
+            document.getElementById(eventObject.feedId).getElementsByTagName('span')[0].innerHTML = eventObject.newName
         },
         publish() {
             const self = this
