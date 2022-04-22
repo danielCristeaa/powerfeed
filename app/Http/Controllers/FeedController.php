@@ -170,7 +170,7 @@ class FeedController extends Controller
             'replace' => urldecode($request->input('replace')),
             'with' => urldecode($request->input('with')),
             'columnName' => $request->input('columnName'),
-            'newColumnName' => $request->input('newName'),
+            'newColumnName' => $request->input('newName') ?: $request->input('columnName'),
         ];
 
         $feedService = new FeedService();

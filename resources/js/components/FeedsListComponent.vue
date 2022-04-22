@@ -2,7 +2,7 @@
     <v-app>
         <div class="d-flex" id="wrapper">
             <div class="bg-light border-right" id="sidebar-wrapper">
-                <div class="sidebar-heading">Your Google Feeds</div>
+                <div class="text-h5 font-weight-regular text-center my-3">Your Google Feeds</div>
 
                 <add-feed-component @new-feed="getUserFeeds"/>
                 <v-tabs vertical>
@@ -137,5 +137,9 @@ export default {
 }
 .vue-notification {
     font-size: 16px;
+}
+#sidebar-wrapper {
+    border-right: 1px solid gray;
+    height: 100vh;
 }
 </style>

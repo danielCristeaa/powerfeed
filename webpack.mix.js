@@ -17,3 +17,4 @@ mix.browserSync({
     proxy: 'webserver',
     open: false,
 });
+mix.postCss('resources/css/app.css', 'public/css');

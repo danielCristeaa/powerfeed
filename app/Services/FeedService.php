@@ -199,6 +199,7 @@ class FeedService
             $updatedFeed->save();
             return true;
         } catch(Exception $e) {
+            dd($updatedFeed);
             return false;
         }
     }

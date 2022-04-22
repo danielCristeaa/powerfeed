@@ -1,22 +1,29 @@
 <template>
-    <div id="grid" class="container-fluid">
-        <v-grid
-            theme="compact"
-            :source="rows"
-            :columns="columns"
-            resize="true"
-            readonly="true"
-        ></v-grid>
-        <edit-column-component :feedId="feedId" :openEditColumnModal="openEditColumnModal" :modal="modal" @update-columns="updateColumns"/>
-    </div>
-
+    <v-data-table
+        :items="rows"
+        :headers="columns"
+        class="elevation-1"
+        :calculate-widths="true"
+        hide-default-header>
+        <template v-slot:header="{ props }">
+            <thead class="v-data-table-header">
+                <tr>
+                    <th class="table-header" v-for="head in props.headers" :key="head.text">{{ head.text }}
+                    <edit-column-component :feedId="feedId" :columnName="head.text" @update-columns="updateColumns"/>
+                    </th>
+                </tr>
+            </thead>
+        </template>
+        <template v-slot:item.description="{ item }">
+            <td class="truncate">
+                {{ item.description }}
+            </td>
+        </template>
+    </v-data-table>
 </template>
 
 <script>
-import VGrid from "@revolist/vue-datagrid";
-
 export default {
-
     name: "Grid",
     props: {
         feedId: {
@@ -36,9 +43,6 @@ export default {
             modal: null,
             openEditColumnModal: 0,
         }
-    },
-    mounted() {
-        this.modal = document.querySelector("#editColumnModal")
     },
     methods: {
         updateColumns() {
@@ -67,41 +71,10 @@ export default {
                     }
                     response.data.data[0].forEach(function(element) {
                         newColumns.push({ prop: element,
-                            name: element,
-                            size: 150,
-                            columnTemplate: (createElement, column) => {
-                                return [createElement('div', {
-                                }, column.name),
-                                    createElement('a', {
-                                        style: {
-                                            position: 'absolute',
-                                            top: '0px',
-                                            right: '10px'
-                                        },
-                                        onclick: function () {
-                                            self.modal.classList.add('show')
-                                            self.modal.style.paddingRight = "17px"
-                                            self.modal.style.display = "block"
-                                            self.openEditColumnModal++;
-
-                                            let input = document.querySelector("input[name='newColumnName']")
-
-                                            setTimeout(() => { self.modal.style.opacity = 1; }, 5);
-
-                                            input.value = column.name
-                                        },
-
-                                    }, createElement('i', {
-                                        class: {
-                                            'fa': true,
-                                            'fa-cog': true
-                                        },
-                                        style: {
-                                            width: '10px',
-                                            height: '10px'
-                                        }
-                                    }))];
-                            },
+                            text: element,
+                            align: 'start',
+                            sortable: false,
+                            value: element,
                         })
                     })
                     response.data.data[1].forEach(function(array) {
@@ -151,16 +124,30 @@ export default {
             this.updateColumns()
         }
     },
-    components: {
-        VGrid,
-    },
 }
 </script>
 
 <style scoped>
-#grid {
+.v-data-table {
     overflow-x: auto;
     overflow-y: auto;
     padding-right: 0;
+    max-height: 100vh;
+}
+.truncate {
+    max-width: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.table-header {
+    font-size: .75rem;
+    user-select: none;
+    text-align: start !important;
+    color: rgba(0,0,0,.6);
+    width: 200px;
+    min-width: 200px;
+    height: 50px;
+    padding: 0 16px;
 }
 </style>
