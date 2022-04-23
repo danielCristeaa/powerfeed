@@ -1,5 +1,6 @@
 <template>
     <v-app>
+        <navbar-component :user="user" :baseUrl="baseUrl"></navbar-component>
         <div class="d-flex" id="wrapper">
             <div class="bg-light border-right" id="sidebar-wrapper">
                 <div class="text-h5 font-weight-regular text-center my-3">Your Google Feeds</div>
@@ -27,11 +28,21 @@
 <script>
 import Grid from './GridComponent'
 import EditFeedModalComponent from "./EditFeedModalComponent";
+import NavbarComponent from './NavbarComponent.vue';
 
 export default {
     components: {
         Grid,
         EditFeedModalComponent,
+        NavbarComponent,
+    },
+    props: {
+        user: {
+            required: true
+        },
+        baseUrl: {
+            required: true
+        }
     },
     data() {
         return {
