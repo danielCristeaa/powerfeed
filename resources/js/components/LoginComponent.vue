@@ -1,5 +1,6 @@
 <template>
     <v-app>
+        <navbar-component :user="null" :base-url="null"></navbar-component>
         <v-form ref="form" @submit.prevent v-model="valid" lazy-validation class="my-auto">
             <v-row>
                 <v-col cols="4" class="mx-auto">
