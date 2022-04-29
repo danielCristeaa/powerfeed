@@ -21,6 +21,11 @@
                     </v-list>
                 </v-menu>
             </template>
+            <template v-else>
+                <v-btn text color="white" @click="redirectToRegister()">
+                    Register
+                </v-btn>
+            </template>
         </v-app-bar>
     </div>
 </template>
@@ -47,6 +52,9 @@ export default {
     methods: {
         logout() {
             axios.post(this.logoutUrl).then(() => window.location = this.baseUrl + "/login")
+        },
+        redirectToRegister() {
+            window.location = '/register'
         }
     }
 }
