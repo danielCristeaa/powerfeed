@@ -24,6 +24,7 @@ Vue.component('edit-column-component', require('./components/EditColumnModal.vue
 Vue.component('user-settings-component', require('./components/UserSettingsComponent.vue').default);
 Vue.component('add-feed-component', require('./components/AddFeedModalComponent.vue').default);
 Vue.component('navbar-component', require('./components/NavbarComponent.vue').default);
+Vue.component('login-component', require('./components/LoginComponent.vue').default);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
