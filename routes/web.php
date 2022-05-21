@@ -20,7 +20,7 @@ Route::get('/', function () {
 Auth::routes();
 
 //Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/feeds', [App\Http\Controllers\FeedController::class, 'index'])->name('feeds');
+Route::get('/feeds', [App\Http\Controllers\FeedController::class, 'index'])->name('feeds')->middleware('redirectToLogin');
 Route::get('/feed/{_id}', [App\Http\Controllers\FeedController::class, 'getFeed']);
 Route::get('/getUserFeeds', [App\Http\Controllers\FeedController::class, 'getUserFeeds']);
 Route::post('addFeed', array('uses'=>'App\Http\Controllers\FeedController@create'));
